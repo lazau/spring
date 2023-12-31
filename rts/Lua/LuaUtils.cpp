@@ -23,8 +23,8 @@
 #include "System/UnorderedMap.hpp"
 #include "System/UnorderedSet.hpp"
 #include "System/StringUtil.h"
-#include <json/writer.h>
-#include <json/json.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/prettywriter.h>
 
 #if !defined UNITSYNC && !defined DEDICATED && !defined BUILDING_AI
 	#include "System/TimeProfiler.h"
@@ -35,7 +35,7 @@
 
 static const int maxDepth = 16;
 
-Json::Value LuaUtils::LuaStackDumper::root  = {};
+rapidjson::Document LuaUtils::LuaStackDumper::root = {};
 
 /******************************************************************************/
 /******************************************************************************/
@@ -1658,8 +1658,10 @@ void LuaUtils::LuaStackDumper::ParseLuaItem(lua_State* L, int i, bool asKey, int
 
 void LuaUtils::LuaStackDumper::PrintBuffer()
 {
-	Json::StyledWriter writer;
-	LOG("[%s()]\n%s", __FUNCTION__, writer.write(root).c_str());
+	rapidjson::StringBuffer buffer;
+	rapidjson::PrettyWriter<StringBuffer> writer(buffer);
+	root.Accept(writer);
+	LOG("[%s()]\n%s", __FUNCTION__, buffer.GetString());
 }
 
 

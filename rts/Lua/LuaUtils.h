@@ -27,6 +27,7 @@
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Units/UnitDef.h"
 #include "Sim/Units/UnitDefHandler.h"
+#include <rapidjson/document.h>
 
 // is defined as macro on FreeBSD (wtf)
 #ifdef isnumber
@@ -35,10 +36,6 @@
 
 struct SolidObjectDef;
 struct SCommandDescription;
-
-namespace Json{
-	class Value;
-};
 
 class LuaUtils {
 	public:
@@ -72,8 +69,8 @@ class LuaUtils {
 			static void ParseTable(lua_State* L, int i, int parseDepth);
 			static void PrintBuffer();
 
-			static Json::Value root;
-			inline static Json::Value* currPtr = nullptr;
+			static rapidjson::Document root;
+			inline static rapidjson::Value* currPtr = nullptr;
 		};
 
 	public:
