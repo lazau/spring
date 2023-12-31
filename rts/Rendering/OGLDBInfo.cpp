@@ -1,12 +1,13 @@
 #include "OGLDBInfo.h"
 
 #include "../../tools/pr-downloader/src/Downloader/CurlWrapper.h"
-#include "../../tools/pr-downloader/src/lib/jsoncpp/include/json/reader.h"
 #include "System/StringUtil.h"
 #include "System/ScopedResource.h"
 
 #include "fmt/format.h"
 #include <sstream>
+#include <string>
+#include <rapidjson/document.h>
 
 namespace {
 	static size_t WriteMemoryCallback(const char* in, size_t size, size_t num, char* out)
@@ -57,22 +58,40 @@ OGLDBInfo::OGLDBInfo(const std::string& glRenderer_, const std::string& myOS_)
 					return false;
 			}
 
-			Json::CharReaderBuilder reader;
-			Json::Value jsonData;
-			std::string errs;
-			if (!Json::parseFromStream(reader, httpData, &jsonData, &errs))
+			rapidjson::Document doc;
+			rapidjson::ParseResult ok = doc.Parse(httpData);
+			if (!ok) { return false; }
+			auto data_it = doc.FindMember("data");
+			if (data_it == doc.MemberEnd() || !data_it->value.IsArray()) {
 				return false;
+			}
 
-			for (const auto& dataItem : jsonData["data"]) {
-				std::string os = StringToLower(dataItem["os"].asString());
+			for (const auto& dataItem : data_it->value.GetArray()) {
+				auto os_it = dataItem.FindMember("os");
+				if (os_it == dataItem.MemberEnd() || !os_it->value.IsString()) {
+					continue;
+				}
+				std::string os = StringToLower(os_it->value.GetString());
 				if (os.find(myOS) != std::string::npos) { //OS match
-					const std::string glVerStr = dataItem["glversion"].asString();
+					auto glversion_it = dataItem.FindMember("glversion");
+					if (glversion_it == dataItem.MemberEnd() ||
+							!glversion_it->value.IsString()) {
+						continue;
+					}
+					const std::string glVerStr = glversion_it->value.GetString();
+
 					int2 glVer = { 0, 0 };
 					if ((sscanf(glVerStr.c_str(), "%i.%i", &glVer.x, &glVer.y) == 2) && (10 * glVer.x + glVer.y > 10 * maxVer.x + maxVer.y)) {
 						maxVer = glVer;
 
-						id  = dataItem["id"].asString();
-						drv = dataItem["version"].asString();
+						if (auto it = dataItem.FindMember("id"); it != dataItem.MemberEnd() &&
+								it->value.IsInt()) {
+							id = std::to_string(it->value.GetInt());
+						}
+						if (auto it = dataItem.FindMember("version"); it != dataItem.MemberEnd() &&
+								it->value.IsString()) {
+							drv = it->value.GetString();
+						}
 					}
 				}
 			}
