@@ -1463,7 +1463,11 @@ void LuaUtils::LuaStackDumper::PrintStack(lua_State* L, int parseDepth)
 
 	for (int i = 1; i <= n; ++i) {
 		const auto oldCurrPtr = currPtr;
-		currPtr = &(*currPtr)[fmt::sprintf("frame: %d", i)];
+		currPtr = &currPtr->AddMember(
+				rapidjson::Value(std::string(fmt::sprintf("frame: %d", i)),
+					root.GetAllocator()).Move(),
+				Value().Move(), root.GetAllocator());
+		//currPtr = &(*currPtr)[fmt::sprintf];
 		ParseLuaItem(L, i, false, parseDepth);  // false --> as_key
 		currPtr = oldCurrPtr;
 	}
