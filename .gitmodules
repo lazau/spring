@@ -30,3 +30,6 @@
 [submodule "rts/lib/cereal"]
 	path = rts/lib/cereal
 	url = https://github.com/USCiLab/cereal.git
+[submodule "rts/lib/ctre"]
+	path = rts/lib/ctre
+	url = https://github.com/hanickadot/compile-time-regular-expressions.git
