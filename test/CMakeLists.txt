@@ -267,6 +267,7 @@ endif()
 		)
 	set(test_libs
 			7zip
+			ctre
 		)
 	add_spring_test(${test_name} "${test_src}" "${test_libs}" "")
 	add_dependencies(test_${test_name} generateVersionFiles)
