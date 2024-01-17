@@ -207,6 +207,7 @@ void LuaParser::SetupEnv(bool isSyncedCtxt, bool isDefsParser)
 bool LuaParser::Execute()
 {
 	ZoneScopedN(__FILE__ ":Execute");
+	ZoneText(fileName.c_str(), fileName.length());
 	LOG("LuaParser::Execute filename = %s textChunk = %s", fileName.c_str(), textChunk.c_str());
 	if (!IsValid()) {
 		errorLog = "could not initialize Lua library";

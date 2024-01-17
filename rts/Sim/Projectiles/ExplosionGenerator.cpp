@@ -37,6 +37,7 @@
 #include "System/Exceptions.h"
 #include "System/SpringMath.h"
 #include "System/SafeUtil.h"
+#include "System/TimeProfiler.h"
 #include "System/StringHash.h"
 
 static DynMemPool<sizeof(CCustomExplosionGenerator)> egMemPool;
@@ -153,6 +154,7 @@ std::string ClassAliasList::FindAlias(const std::string& className) const
 
 void CExplosionGeneratorHandler::Init()
 {
+	SCOPED_ONCE_TIMER("CExplosionGeneratorHandler::Init");
 	egMemPool.clear();
 	egMemPool.reserve(512);
 

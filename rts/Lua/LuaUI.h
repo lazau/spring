@@ -50,7 +50,6 @@ public:
 	static bool CanLoadHandler() { return true; }
 	static bool ReloadHandler() { return (FreeHandler(), LoadFreeHandler()); } // NOTE the ','
 	static bool LoadFreeHandler() {
-		ZoneScopedN("LuaUI::LoadFreeHandler");
 		return (LoadHandler() || FreeHandler());
 	}
 

@@ -3,6 +3,8 @@
 #include "LuaHandleSynced.h"
 
 #include "LuaInclude.h"
+#include <tracy/Tracy.hpp>
+#include <typeinfo>
 
 #include "LuaUtils.h"
 #include "LuaArchive.h"
@@ -80,6 +82,9 @@ CUnsyncedLuaHandle::~CUnsyncedLuaHandle() = default;
 
 bool CUnsyncedLuaHandle::Init(std::string code, const std::string& file)
 {
+	ZoneScoped;
+	std::string zonetext = file + " [" + typeid(this).name() + "] (Unsynced)";
+	ZoneText(zonetext.c_str(), zonetext.length());
 	if (!IsValid())
 		return false;
 
@@ -418,6 +423,9 @@ CSyncedLuaHandle::~CSyncedLuaHandle()
 
 bool CSyncedLuaHandle::Init(std::string code, const std::string& file)
 {
+	ZoneScoped;
+	std::string zonetext = file + " [" + typeid(this).name() + "] (Synced)";
+	ZoneText(zonetext.c_str(), zonetext.length());
 	if (!IsValid())
 		return false;
 

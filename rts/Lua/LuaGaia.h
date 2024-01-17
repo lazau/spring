@@ -15,7 +15,6 @@ public:
 	static bool CanLoadHandler();
 	static bool ReloadHandler() { return (FreeHandler(), LoadFreeHandler()); } // NOTE the ','
 	static bool LoadFreeHandler(bool dryRun = false) {
-		ZoneScopedN("LuaGaia::LoadFreeHandler");
 		return (LoadHandler(dryRun) || FreeHandler());
 	}
 

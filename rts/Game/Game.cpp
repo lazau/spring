@@ -634,7 +634,7 @@ void CGame::LoadDefs(LuaParser* defsParser)
 
 void CGame::PreLoadSimulation(LuaParser* defsParser)
 {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::PreLoadSimulation");
 	ENTER_SYNCED_CODE();
 
 	loadscreen->SetLoadMessage("Creating Smooth Height Mesh");
@@ -649,7 +649,7 @@ void CGame::PreLoadSimulation(LuaParser* defsParser)
 
 void CGame::PostLoadSimulation(LuaParser* defsParser)
 {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::PostLoadSimulation");
 	CommonDefHandler::InitStatic();
 
 	{
@@ -721,7 +721,7 @@ void CGame::PostLoadSimulation(LuaParser* defsParser)
 
 void CGame::PreLoadRendering()
 {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::PreLoadRendering");
 	auto lock = CLoadLock::GetUniqueLock();
 
 	geometricObjects = new CGeometricObjects();
@@ -733,14 +733,14 @@ void CGame::PreLoadRendering()
 }
 
 void CGame::PostLoadRendering() {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::PostLoadRendering");
 	worldDrawer.InitPost();
 }
 
 
 void CGame::LoadInterface()
 {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::LoadInterface");
 	auto lock = CLoadLock::GetUniqueLock();
 
 	camHandler->Init();
@@ -831,7 +831,7 @@ void CGame::LoadInterface()
 
 void CGame::LoadLua(bool dryRun, bool onlyUnsynced)
 {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::LoadLua");
 	assert(!(dryRun && onlyUnsynced));
 	// Lua components
 	ENTER_SYNCED_CODE();
@@ -857,6 +857,7 @@ void CGame::LoadLua(bool dryRun, bool onlyUnsynced)
 	LEAVE_SYNCED_CODE();
 
 	if (!dryRun) {
+		SCOPED_ONCE_TIMER("Game::LoadLua (LuaUI)");
 		loadscreen->SetLoadMessage("Loading LuaUI");
 		auto lock = CLoadLock::GetUniqueLock();
 		CLuaUI::LoadFreeHandler();
@@ -893,7 +894,7 @@ void CGame::LoadSkirmishAIs()
 
 void CGame::LoadFinalize()
 {
-	ZoneScoped;
+	SCOPED_ONCE_TIMER("Game::LoadFinalize");
 	{
 		loadscreen->SetLoadMessage("[" + std::string(__func__) + "] finalizing PFS");
 
@@ -917,6 +918,7 @@ void CGame::LoadFinalize()
 
 void CGame::PostLoad()
 {
+	SCOPED_ONCE_TIMER("Game::PostLoad");
 	GameSetupDrawer::Disable();
 
 	if (gameServer != nullptr) {

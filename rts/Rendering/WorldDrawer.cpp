@@ -55,6 +55,7 @@ CONFIG(bool, PreloadModels).defaultValue(true).description("The engine will prel
 
 void CWorldDrawer::InitPre() const
 {
+	SCOPED_ONCE_TIMER("CWorldDrawer::InitPre");
 	LuaObjectDrawer::Init();
 
 	CColorMap::InitStatic();
@@ -78,11 +79,13 @@ void CWorldDrawer::InitPre() const
 
 void CWorldDrawer::InitPost() const
 {
+	SCOPED_ONCE_TIMER("CWorldDrawer::InitPost");
 	char buf[512] = {0};
 
 	CModelsLock::SetThreadSafety(true);
 	const bool preloadMode = configHandler->GetBool("PreloadModels");
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (Models)");
 		loadscreen->SetLoadMessage("Loading Models");
 
 		if (preloadMode) {
@@ -101,15 +104,18 @@ void CWorldDrawer::InitPost() const
 	}
 	auto lock = CLoadLock::GetUniqueLock();
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (Shadow Handler)");
 		loadscreen->SetLoadMessage("Creating ShadowHandler");
 		shadowHandler.Init();
 	}
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (InfoTextureHandler)");
 		// SMFGroundDrawer accesses InfoTextureHandler, create it first
 		loadscreen->SetLoadMessage("Creating InfoTextureHandler");
 		IInfoTextureHandler::Create();
 	}
 	try {
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (GroundDrawer)");
 		loadscreen->SetLoadMessage("Creating GroundDrawer");
 		readMap->InitGroundDrawer();
 	} catch (const content_error& e) {
@@ -118,20 +124,25 @@ void CWorldDrawer::InitPost() const
 	}
 
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (GrassDrawer)");
 		loadscreen->SetLoadMessage("Creating GrassDrawer");
 		grassDrawer = new CGrassDrawer();
 	}
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (PathDrawer)");
 		inMapDrawerView = new CInMapDrawView();
 		pathDrawer = IPathDrawer::GetInstance();
 	}
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (HeightMap)");
 		heightMapTexture = new HeightMapTexture();
 	}
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (GroundDecal)");
 		IGroundDecalDrawer::Init();
 	}
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (Projectile and Unit drawer)");
 		loadscreen->SetLoadMessage("Creating ProjectileDrawer & UnitDrawer");
 
 		CProjectileDrawer::InitStatic();
@@ -145,6 +156,7 @@ void CWorldDrawer::InitPost() const
 		throw content_error(buf);
 
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (Water)");
 		loadscreen->SetLoadMessage("Creating Water");
 		IWater::SetWater(-1);
 	}
@@ -153,6 +165,7 @@ void CWorldDrawer::InitPost() const
 	}
 	lock = {}; //unlock
 	{
+		SCOPED_ONCE_TIMER("CWorldDrawer::InitPost (Finalize Models)");
 		loadscreen->SetLoadMessage("Finalizing Models");
 		modelLoader.DrainPreloadFutures(0);
 		auto& mv = S3DModelVAO::GetInstance();
