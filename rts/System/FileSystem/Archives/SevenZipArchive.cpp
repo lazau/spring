@@ -2,6 +2,8 @@
 
 #include "SevenZipArchive.h"
 
+#include <chrono>
+#include <sstream>
 #include <algorithm>
 #include <cassert>
 #include <cstring>
@@ -213,20 +215,28 @@ CSevenZipArchive::~CSevenZipArchive()
 
 int CSevenZipArchive::GetFileImpl(unsigned int fid, std::vector<std::uint8_t>& buffer)
 {
+	auto start = std::chrono::system_clock::now();
+	LOG("CSevenZipArchive::GetFileImpl");
 	// assert(archiveLock.locked());
 	assert(IsFileId(fid));
 
 	size_t offset = 0;
 	size_t outSizeProcessed = 0;
 
+	LOG("CSevenZipArchive::GetFileImpl-Extracting");
 	if (SzArEx_Extract(&db, &lookStream.vt, fileEntries[fid].fp, &blockIndex, &outBuffer,
 	                   &outBufferSize, &offset, &outSizeProcessed, &allocImp, &allocTempImp) != SZ_OK)
 		return 0;
 
+	LOG("CSevenZipArchive::GetFileImpl-Resize + memcpy");
 	buffer.resize(outSizeProcessed);
 	if (outSizeProcessed > 0) {
 		memcpy(buffer.data(), reinterpret_cast<char*>(outBuffer) + offset, outSizeProcessed);
 	}
+	auto diff = std::chrono::system_clock::now() - start;
+	std::stringstream ss;
+	ss << diff;
+	LOG("CSevenZipArchive::GetFileImpl-done %s", ss.str().c_str());
 	return 1;
 }
 

@@ -278,6 +278,7 @@ bool CLoadScreen::Update()
 
 bool CLoadScreen::Draw()
 {
+  ZoneScoped;
 	// limit FPS via sleep to not lock a singlethreaded CPU from loading the game
 	if (mtLoading) {
 		const spring_time now = spring_gettime();
@@ -292,20 +293,30 @@ bool CLoadScreen::Draw()
 		lastDrawTime = now;
 	}
 
+  LOG("[LoadScreen::%s] drawFrame", __func__);
 	globalRendering->drawFrame = std::max(1U, globalRendering->drawFrame + 1);
 	// let LuaMenu keep the lobby connection alive
-	if (luaMenu != nullptr)
+	if (luaMenu != nullptr) {
+    LOG("[LoadScreen::%s] luaMenu->Update", __func__);
 		luaMenu->Update();
+  }
 
 	if (luaIntro != nullptr) {
+    ZoneScopedN("[CLoadScreen::Draw] luaIntro calls");
+    LOG("[LoadScreen::%s] luaIntro->Update", __func__);
 		luaIntro->Update();
+    LOG("[LoadScreen::%s] luaIntro->DrawGenesis", __func__);
 		luaIntro->DrawGenesis();
+    LOG("[LoadScreen::%s] ClearScreen", __func__);
 		ClearScreen();
+    LOG("[LoadScreen::%s] DrawLoadScreen", __func__);
 		luaIntro->DrawLoadScreen();
 	}
 
-	if (!mtLoading)
+	if (!mtLoading) {
+    LOG("[LoadScreen::%s] SwapBuffer", __func__);
 		globalRendering->SwapBuffers(true, false);
+  }
 
 	return true;
 }
@@ -322,7 +333,8 @@ void CLoadScreen::SetLoadMessage(const std::string& text, bool replaceLast)
 
 	loadMessages.emplace_back(text, replaceLast);
 
-	LOG("[LoadScreen::%s] text=\"%s\"", __func__, text.c_str());
+	LOG("[LoadScreen::%s] text=\"%s\"; mtLoading = %s", __func__, text.c_str(),
+      mtLoading ? "true" : "false");
 	LOG_CLEANUP();
 
 	// be paranoid about FPU state for the loading thread since some
@@ -333,7 +345,10 @@ void CLoadScreen::SetLoadMessage(const std::string& text, bool replaceLast)
 	if (mtLoading)
 		return;
 
+	LOG("[LoadScreen::%s] Update()", __func__);
 	Update();
+	LOG("[LoadScreen::%s] Draw()", __func__);
 	Draw();
+	LOG("[LoadScreen::%s] Drew", __func__);
 }
 

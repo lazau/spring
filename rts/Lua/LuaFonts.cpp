@@ -201,6 +201,7 @@ int LuaFonts::DeleteFont(lua_State* L)
 
 int LuaFonts::Print(lua_State* L)
 {
+  ZoneScopedN("LuaFonts::Print");
 	CheckDrawingEnabled(L, __func__);
 
 	const int args = lua_gettop(L); // number of arguments
@@ -242,7 +243,11 @@ int LuaFonts::Print(lua_State* L)
 		}
 	}
 
-	f->glPrint(x, y, size, options, text);
+  {
+    ZoneScopedN("LuaFonts::Print::glPrint");
+    LOG("[LuaFonts::Print] text=%s", text.c_str());
+    f->glPrint(x, y, size, options, text);
+  }
 	return 0;
 }
 

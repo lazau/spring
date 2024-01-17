@@ -76,6 +76,7 @@ ScopedOnceTimer::ScopedOnceTimer(const char* timerName, const char* timerFrmt): 
 
 	name[sizeof(name) - 1] = 0;
 	frmt[sizeof(frmt) - 1] = 0;
+	LOG(frmt, __func__, name, int(startTime.toMilliSecsi()));
 }
 
 ScopedOnceTimer::ScopedOnceTimer(const std::string& timerName, const char* timerFrmt): startTime(spring_gettime())
@@ -85,6 +86,7 @@ ScopedOnceTimer::ScopedOnceTimer(const std::string& timerName, const char* timer
 
 	name[sizeof(name) - 1] = 0;
 	frmt[sizeof(frmt) - 1] = 0;
+	LOG(frmt, __func__, name, int(startTime.toMilliSecsi()));
 }
 
 ScopedOnceTimer::~ScopedOnceTimer()

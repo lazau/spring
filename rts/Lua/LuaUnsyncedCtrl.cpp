@@ -2201,6 +2201,7 @@ int LuaUnsyncedCtrl::SetFeatureSelectionVolumeData(lua_State* L)
  */
 int LuaUnsyncedCtrl::AddUnitIcon(lua_State* L)
 {
+	ZoneScoped;
 	if (CLuaHandle::GetHandleSynced(L))
 		return 0;
 
@@ -2227,6 +2228,7 @@ int LuaUnsyncedCtrl::AddUnitIcon(lua_State* L)
  */
 int LuaUnsyncedCtrl::FreeUnitIcon(lua_State* L)
 {
+	ZoneScoped;
 	if (CLuaHandle::GetHandleSynced(L))
 		return 0;
 
@@ -2265,6 +2267,7 @@ int LuaUnsyncedCtrl::UnitIconSetDraw(lua_State* L)
  */
 int LuaUnsyncedCtrl::SetUnitDefIcon(lua_State* L)
 {
+	ZoneScoped;
 	const UnitDef* ud = unitDefHandler->GetUnitDefByID(luaL_checkint(L, 1));
 
 	if (ud == nullptr)

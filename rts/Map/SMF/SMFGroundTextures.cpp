@@ -84,6 +84,7 @@ CSMFGroundTextures::CSMFGroundTextures(CSMFReadMap* rm): smfMap(rm)
 
 void CSMFGroundTextures::LoadTiles(CSMFMapFile& file)
 {
+	SCOPED_ONCE_TIMER("CSMFGroundTextures::LoadTiles");
 	loadscreen->SetLoadMessage("Loading Map Tiles");
 
 	CFileHandler* ifs = file.GetFileHandler();
@@ -122,10 +123,12 @@ void CSMFGroundTextures::LoadTiles(CSMFMapFile& file)
 		}
 	}
 
+	LOG("Num tiles = %d", tileHeader.numTileFiles);
 	for (int a = 0, curTile = 0; a < tileHeader.numTileFiles; ++a) {
 		int numSmallTiles = 0;
 		char fileNameBuffer[256] = {0};
 
+		LOG("ifs read");
 		ifs->Read(&numSmallTiles, sizeof(int));
 		ifs->ReadString(&fileNameBuffer[0], sizeof(char) * (sizeof(fileNameBuffer) - 1));
 		swabDWordInPlace(numSmallTiles);
@@ -137,10 +140,12 @@ void CSMFGroundTextures::LoadTiles(CSMFMapFile& file)
 
 		CFileHandler tileFile(smtFilePath);
 
+		LOG("try abs path");
 		// try absolute path
 		if (!tileFile.FileExists())
 			tileFile.Open(smtFilePath = (!smtHeaderOverride) ? smtFileName : smf.smtFileNames[a]);
 
+		LOG("try abs path again");
 		if (!tileFile.FileExists()) {
 			LOG_L(L_WARNING,
 				"[SMFGroundTextures::%s] could not find .smt tile-file %d (\"%s\"; ALL %d SMALL TILES WILL BE MADE RED)",
@@ -152,6 +157,7 @@ void CSMFGroundTextures::LoadTiles(CSMFMapFile& file)
 			continue;
 		}
 
+		LOG("file header");
 		TileFileHeader tfh;
 		CSMFMapFile::ReadMapTileFileHeader(tfh, tileFile);
 
@@ -163,6 +169,7 @@ void CSMFGroundTextures::LoadTiles(CSMFMapFile& file)
 			throw content_error(err);
 		}
 
+		LOG("Tile filename %s, filepath %s, num small tiles = %d", smtFileName.c_str(), smtFilePath.c_str(), numSmallTiles);
 		for (int b = 0; b < numSmallTiles; ++b) {
 			tileFile.Read(&tiles[(curTile++) * SMALL_TILE_SIZE], SMALL_TILE_SIZE);
 		}

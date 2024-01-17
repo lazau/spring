@@ -16,7 +16,8 @@ mkdir -p "${CCACHE_DIR}"
 docker run -it --rm                                      \
             -v /etc/passwd:/etc/passwd:ro                \
             -v /etc/group:/etc/group:ro                  \
-            --user="$(id -u):$(id -g)"                   \
+            --security-opt="label=disable"               \
+            --user="0:0"                                 \
             -v "${ENGINE_GIT_DIR}":"/spring"             \
             -v "${LINUX_LIBS_DIR}":"/spring-static-libs" \
             -v "${WINDOWS_LIBS_DIR}":"/mingwlibs64"      \

@@ -3,6 +3,8 @@
 
 #include "FileHandler.h"
 
+#include <tracy/Tracy.hpp>
+
 #include <string>
 #include <vector>
 #include <fstream>
@@ -12,6 +14,7 @@
 #include <climits>
 #include <cstring>
 
+#include "System/Log/ILog.h"
 #include "System/SpringRegex.h"
 
 #include "FileQueryFlags.h"
@@ -106,6 +109,8 @@ bool CFileHandler::TryReadFromVFS(const string& fileName, int section)
 
 void CFileHandler::Open(const string& fileName, const string& modes)
 {
+	ZoneScoped;
+	LOG("CFileHandler::Open %s; modes %s", fileName.c_str(), modes.c_str());
 	this->fileName = fileName;
 	for (char c: modes) {
 #ifndef TOOLS
@@ -141,11 +146,13 @@ bool CFileHandler::FileExists(const std::string& filePath, const std::string& mo
 	for (char c: modes) {
 #ifndef TOOLS
 		CVFSHandler::Section section = CVFSHandler::GetModeSection(c);
-		if ((section != CVFSHandler::Section::Error) && vfsHandler->FileExists(filePath, section) == 1)
+		if ((section != CVFSHandler::Section::Error) && vfsHandler->FileExists(filePath, section) == 1) {
 			return true;
+		}
 
-		if ((c == SPRING_VFS_RAW[0]) && FileSystem::FileExists(dataDirsAccess.LocateFile(filePath)))
+		if ((c == SPRING_VFS_RAW[0]) && FileSystem::FileExists(dataDirsAccess.LocateFile(filePath))) {
 			return true;
+		}
 #endif
 		if (c == SPRING_VFS_PWD[0]) {
 #ifndef TOOLS
@@ -168,6 +175,7 @@ bool CFileHandler::FileExists(const std::string& filePath, const std::string& mo
 
 int CFileHandler::Read(void* buf, int length)
 {
+	ZoneScoped;
 	if (ifs.is_open()) {
 		ifs.read(static_cast<char*>(buf), length);
 		return ifs.gcount();

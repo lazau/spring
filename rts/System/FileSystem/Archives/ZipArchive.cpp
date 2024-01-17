@@ -86,6 +86,7 @@ void CZipArchive::FileInfo(unsigned int fid, std::string& name, int& size) const
 // than one file at a time
 int CZipArchive::GetFileImpl(unsigned int fid, std::vector<std::uint8_t>& buffer)
 {
+	LOG("CZipArchive::GetFileImpl");
 	// Prevent opening files on missing/invalid archives
 	if (zip == nullptr)
 		return -4;

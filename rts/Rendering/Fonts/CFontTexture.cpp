@@ -6,6 +6,7 @@
 
 #include <cstring> // for memset, memcpy
 #include <string>
+#include <format>
 #include <vector>
 #include <sstream>
 
@@ -140,7 +141,8 @@ public:
 			return;
 
 		FcConfigDestroy(config);
-		FcFini();
+		//DONOTSUBMIT(lazau): Prevents assertion failure on exit.
+		//FcFini();
 		config = nullptr;
 		#endif
 	}
@@ -541,8 +543,11 @@ CFontTexture::CFontTexture(const std::string& fontfile, int size, int _outlinesi
 	, texWidth(0)
 	, texHeight(0)
 	, wantedTexWidth(0)
-	, wantedTexHeight(0)
+	, wantedTexHeight(0),
+  fontfile_(fontfile)
 {
+  LOG("CFontTexture %s size %d outlinesize %d outlineweight %f", fontfile_.c_str(),
+      size, _outlinesize, _outlineweight);
 	atlasAlloc.SetNonPowerOfTwo(globalRendering->supportNonPowerOfTwoTex);
 	atlasAlloc.SetMaxSize(globalRendering->maxTextureSize, globalRendering->maxTextureSize);
 
@@ -599,7 +604,7 @@ CFontTexture::CFontTexture(const std::string& fontfile, int size, int _outlinesi
 
 	//preload Glyphs
 	LoadWantedGlyphs(32, 127);
-	for (char32_t i = 32; i < 127; ++i) {
+  for (char32_t i = 32; i < 127; ++i) {
 		const auto& lgl = GetGlyph(i);
 		const float advance = lgl.advance;
 		for (char32_t j = 32; j < 127; ++j) {
@@ -620,6 +625,8 @@ CFontTexture::~CFontTexture()
 	CglFontRenderer::DeleteInstance(fontRenderer);
 #ifndef HEADLESS
 	glDeleteTextures(1, &glyphAtlasTextureID);
+  LOG("~CFontTexture %s glyphAtlasTextureID %u size %d outlinesize %d outlineweight %f",
+      fontfile_.c_str(),glyphAtlasTextureID, fontSize, outlineSize, outlineWeight);
 	glyphAtlasTextureID = 0;
 #endif
 }
@@ -642,6 +649,7 @@ void CFontTexture::KillFonts()
 }
 
 void CFontTexture::Update() {
+  ZoneScoped;
 	// called from Game::UpdateUnsynced
 	assert(CFontTexture::sync.GetThreadSafety() || Threading::IsMainThread());
 	auto lock = CFontTexture::sync.GetScopedLock();
@@ -710,6 +718,7 @@ float CFontTexture::GetKerning(const GlyphInfo& lgl, const GlyphInfo& rgl)
 
 void CFontTexture::LoadWantedGlyphs(char32_t begin, char32_t end)
 {
+  LOG("Loading additional wanted glyphs array for fontfile %s (begin = %d; end = %d)", fontfile_.c_str(), begin, end);
 	static std::vector<char32_t> wanted;
 	wanted.clear();
 	for (char32_t i = begin; i < end; ++i)
@@ -723,6 +732,12 @@ void CFontTexture::LoadWantedGlyphs(const std::vector<char32_t>& wanted)
 #ifndef HEADLESS
 	if (wanted.empty())
 		return;
+  if (wanted.size() == 1) {
+    LOG("Loading additional wanted glyphs for fontfile %s (size = 1); glyph %d 0x%08x %c", fontfile_.c_str(), wanted[0],
+        wanted[0], wanted[0]);
+  } else {
+    LOG("Wanted size = %ld", wanted.size());
+  }
 
 	assert(CFontTexture::sync.GetThreadSafety() || Threading::IsMainThread());
 	auto lock = CFontTexture::sync.GetScopedLock();
@@ -1043,6 +1058,7 @@ bool CFontTexture::GlyphAtlasTextureNeedsUpload() const
 
 void CFontTexture::UpdateGlyphAtlasTexture()
 {
+  ZoneScoped;
 #ifndef HEADLESS
 	// no need to lock, MT safe
 	if (!GlyphAtlasTextureNeedsUpdate())
@@ -1054,6 +1070,11 @@ void CFontTexture::UpdateGlyphAtlasTexture()
 
 	// merge shadow and regular atlas bitmaps, dispose shadow
 	if (atlasUpdateShadow.xsize == atlasUpdate.xsize && atlasUpdateShadow.ysize == atlasUpdate.ysize) {
+    LOG("CFontTexture::UpdateGlyphAtlasTexture blurring font file %s", fontfile_.c_str());
+    //atlasUpdateShadow.Save(std::format("{}_atlasUpdateShadow.bmp", fontfile_),
+    //    /*opaque=*/false, /*logged=*/true, /*quality=*/1);
+    //atlasUpdateShadow.Save(std::format("{}_atlasUpdate.bmp", fontfile_),
+    //    /*opaque=*/false, /*logged=*/true, /*quality=*/1);
 		atlasUpdateShadow.Blur(outlineSize, outlineWeight);
 		assert((atlasUpdate.xsize * atlasUpdate.ysize) % sizeof(int) == 0);
 
@@ -1065,10 +1086,19 @@ void CFontTexture::UpdateGlyphAtlasTexture()
 		assert(atlasUpdateShadow.GetMemSize() / sizeof(int) == size);
 		assert(atlasUpdate.GetMemSize() / sizeof(int) == size);
 
+    LOG("CFontTexture::UpdateGlyphAtlasTexture memcpy");
 		for (int i = 0; i < size; ++i) {
 			dst[i] |= src[i];
 		}
+    {
+      ZoneScopedN("SaveBitmap");
+      //atlasUpdateShadow.Save(std::format("{}_updatedAtlasUpdate.png", fontfile_),
+      //    /*opaque=*/true, /*logged=*/true, /*quality=*/1);
+    }
+    //atlasUpdateShadow.Save(std::format("{}_updatedAtlasUpdateShadow.bmp", fontfile_),
+    //    /*opaque=*/false, /*logged=*/true, /*quality=*/1);
 
+    LOG("CFontTexture::UpdateGlyphAtlasTexture memcpy done");
 		atlasUpdateShadow = {}; // MT-safe
 		needsTextureUpload = true;
 	}

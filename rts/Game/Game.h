@@ -56,6 +56,7 @@ public:
 private:
 	void AddTimedJobs();
 
+	void PrepareLoadScreenAssets() const;
 	void LoadMap(const std::string& mapName);
 	void LoadDefs(LuaParser* defsParser);
 	void PreLoadSimulation(LuaParser* defsParser);

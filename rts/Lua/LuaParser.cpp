@@ -56,6 +56,7 @@ LuaParser::LuaParser(const std::string& _fileName, const std::string& _fileModes
 	, lowerKeys(true)
 	, lowerCppKeys(true)
 {
+	ZoneScopedN(__FILE__ ":LuaParser");
 	// be on the safe side
 	// D.synced = synced.b;
 	D.synced = true;
@@ -80,6 +81,7 @@ LuaParser::LuaParser(const std::string& _textChunk, const std::string& _accessMo
 	, lowerKeys(true)
 	, lowerCppKeys(true)
 {
+	ZoneScopedN(__FILE__ ":LuaParser");
 	// be on the safe side
 	// D.synced = synced.b;
 	D.synced = true;
@@ -113,6 +115,7 @@ LuaParser::~LuaParser()
 
 void LuaParser::SetupLua(bool isSyncedCtxt, bool isDefsParser)
 {
+	ZoneScopedN(__FILE__ ":SetupLua");
 	if ((L = LUA_OPEN(&D)) == nullptr)
 		return;
 
@@ -121,6 +124,7 @@ void LuaParser::SetupLua(bool isSyncedCtxt, bool isDefsParser)
 
 void LuaParser::SetupEnv(bool isSyncedCtxt, bool isDefsParser)
 {
+	ZoneScopedN(__FILE__ ":SetupEnv");
 	LUA_OPEN_LIB(L, luaopen_base);
 	LUA_OPEN_LIB(L, luaopen_math);
 	LUA_OPEN_LIB(L, luaopen_table);
@@ -193,6 +197,8 @@ void LuaParser::SetupEnv(bool isSyncedCtxt, bool isDefsParser)
 	GetTable("LOG");
 	LuaUtils::PushLogEntries(L);
 	EndTable();
+
+	tracy::LuaRegister(L);
 }
 
 
@@ -200,6 +206,8 @@ void LuaParser::SetupEnv(bool isSyncedCtxt, bool isDefsParser)
 
 bool LuaParser::Execute()
 {
+	ZoneScopedN(__FILE__ ":Execute");
+	LOG("LuaParser::Execute filename = %s textChunk = %s", fileName.c_str(), textChunk.c_str());
 	if (!IsValid()) {
 		errorLog = "could not initialize Lua library";
 		return false;
@@ -292,12 +300,18 @@ bool LuaParser::Execute()
 }
 
 
-void LuaParser::AddTable(LuaTable* tbl) { spring::VectorInsertUnique(tables, tbl); }
-void LuaParser::RemoveTable(LuaTable* tbl) { spring::VectorErase(tables, tbl); }
+void LuaParser::AddTable(LuaTable* tbl) {
+	ZoneScopedN(__FILE__ ":AddTable");
+	spring::VectorInsertUnique(tables, tbl);
+}
+void LuaParser::RemoveTable(LuaTable* tbl) {
+	ZoneScopedN(__FILE__ ":RemoveTable");
+	spring::VectorErase(tables, tbl); }
 
 
 LuaTable LuaParser::GetRoot()
 {
+	ZoneScopedN(__FILE__ ":GetRoot");
 	return LuaTable(this);
 }
 
@@ -306,6 +320,7 @@ LuaTable LuaParser::GetRoot()
 
 void LuaParser::PushParam()
 {
+	ZoneScopedN(__FILE__ ":PushParam");
 	if (!IsValid() || (initDepth < 0))
 		return;
 
@@ -319,6 +334,7 @@ void LuaParser::PushParam()
 
 void LuaParser::GetTable(const std::string& name, bool overwrite)
 {
+	ZoneScopedN(__FILE__ ":GetTable");
 	if (!IsValid() || (initDepth < 0))
 		return;
 
@@ -341,6 +357,7 @@ void LuaParser::GetTable(const std::string& name, bool overwrite)
 
 void LuaParser::GetTable(int index, bool overwrite)
 {
+	ZoneScopedN(__FILE__ ":GetTable");
 	if (!IsValid() || (initDepth < 0))
 		return;
 
@@ -363,6 +380,7 @@ void LuaParser::GetTable(int index, bool overwrite)
 
 void LuaParser::EndTable()
 {
+	ZoneScopedN(__FILE__ ":EndTable");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	assert(initDepth > 0);
@@ -375,6 +393,7 @@ void LuaParser::EndTable()
 
 void LuaParser::AddFunc(const std::string& key, int (*func)(lua_State*))
 {
+	ZoneScopedN(__FILE__ ":AddFunc");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	if (func == nullptr)
@@ -392,6 +411,7 @@ void LuaParser::AddFunc(const std::string& key, int (*func)(lua_State*))
 
 void LuaParser::AddInt(const std::string& key, int value)
 {
+	ZoneScopedN(__FILE__ ":AddInt");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushsstring(L, key);
@@ -402,6 +422,7 @@ void LuaParser::AddInt(const std::string& key, int value)
 
 void LuaParser::AddBool(const std::string& key, bool value)
 {
+	ZoneScopedN(__FILE__ ":AddBool");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushsstring(L, key);
@@ -412,6 +433,7 @@ void LuaParser::AddBool(const std::string& key, bool value)
 
 void LuaParser::AddFloat(const std::string& key, float value)
 {
+	ZoneScopedN(__FILE__ ":AddFloat");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushsstring(L, key);
@@ -422,6 +444,7 @@ void LuaParser::AddFloat(const std::string& key, float value)
 
 void LuaParser::AddString(const std::string& key, const std::string& value)
 {
+	ZoneScopedN(__FILE__ ":AddString");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushsstring(L, key);
@@ -434,6 +457,7 @@ void LuaParser::AddString(const std::string& key, const std::string& value)
 
 void LuaParser::AddFunc(int key, int (*func)(lua_State*))
 {
+	ZoneScopedN(__FILE__ ":AddFunc");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	if (func == nullptr)
@@ -448,6 +472,7 @@ void LuaParser::AddFunc(int key, int (*func)(lua_State*))
 
 void LuaParser::AddInt(int key, int value)
 {
+	ZoneScopedN(__FILE__ ":AddInt");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushnumber(L, key);
@@ -458,6 +483,7 @@ void LuaParser::AddInt(int key, int value)
 
 void LuaParser::AddBool(int key, bool value)
 {
+	ZoneScopedN(__FILE__ ":AddBool");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushnumber(L, key);
@@ -468,6 +494,7 @@ void LuaParser::AddBool(int key, bool value)
 
 void LuaParser::AddFloat(int key, float value)
 {
+	ZoneScopedN(__FILE__ ":AddFloat");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushnumber(L, key);
@@ -478,6 +505,7 @@ void LuaParser::AddFloat(int key, float value)
 
 void LuaParser::AddString(int key, const std::string& value)
 {
+	ZoneScopedN(__FILE__ ":AddString");
 	if (!IsValid() || (initDepth < 0))
 		return;
 	lua_pushnumber(L, key);
@@ -494,6 +522,7 @@ void LuaParser::AddString(int key, const std::string& value)
 
 int LuaParser::TimeCheck(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":TimeCheck");
 	#if (!defined(UNITSYNC) && !defined(DEDICATED))
 	if (!lua_isstring(L, 1) || !lua_isfunction(L, 2))
 		luaL_error(L, "Invalid arguments to TimeCheck('string', func, ...)");
@@ -524,6 +553,7 @@ int LuaParser::TimeCheck(lua_State* L)
 int LuaParser::RandomSeed(lua_State* L) { return (DummyRandomSeed(L)); }
 int LuaParser::Random(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":Random");
 	// both US and DS depend on LuaParser via MapParser, etc
 	#if (!defined(UNITSYNC) && !defined(DEDICATED))
 
@@ -580,6 +610,7 @@ int LuaParser::DummyRandom(lua_State* L) { return 0; }
 
 int LuaParser::DirList(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":DirList");
 	const LuaParser* currentParser = GetLuaParser(L);
 
 	const std::string& dir = luaL_checkstring(L, 1);
@@ -598,6 +629,7 @@ int LuaParser::DirList(lua_State* L)
 
 int LuaParser::SubDirs(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":SubDirs");
 	const LuaParser* currentParser = GetLuaParser(L);
 
 	const std::string& dir = luaL_checkstring(L, 1);
@@ -617,6 +649,7 @@ int LuaParser::SubDirs(lua_State* L)
 
 int LuaParser::Include(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":Include");
 	const LuaParser* currentParser = GetLuaParser(L);
 
 	// filename [, fenv]
@@ -644,7 +677,11 @@ int LuaParser::Include(lua_State* L)
 	}
 
 	tracy::LuaRemove(code.data());
-	int error = luaL_loadbuffer(L, code.c_str(), code.size(), filename.c_str());
+	int error;
+	{
+	ZoneScopedN(__FILE__ ":Include:loadbuffer");
+	error	= luaL_loadbuffer(L, code.c_str(), code.size(), filename.c_str());
+	}
 	if (error != 0) {
 		char buf[1024];
 		SNPRINTF(buf, sizeof(buf), "error = %i, %s, %s\n", error, filename.c_str(), lua_tostring(L, -1));
@@ -666,7 +703,10 @@ int LuaParser::Include(lua_State* L)
 
 	const int paramTop = lua_gettop(L) - 1;
 
+	{
+	ZoneScopedN(__FILE__ ":Include:pcall");
 	error = lua_pcall(L, 0, LUA_MULTRET, 0);
+	}
 
 	if (error != 0) {
 		char buf[1024];
@@ -686,6 +726,7 @@ int LuaParser::Include(lua_State* L)
 
 int LuaParser::LoadFile(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":LoadFile");
 	const LuaParser* currentParser = GetLuaParser(L);
 
 	const std::string& filename = luaL_checkstring(L, 1);
@@ -718,6 +759,7 @@ int LuaParser::LoadFile(lua_State* L)
 
 int LuaParser::FileExists(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":FileExists");
 	const LuaParser* currentParser = GetLuaParser(L);
 
 	const std::string& filename = luaL_checkstring(L, 1);
@@ -735,6 +777,7 @@ int LuaParser::FileExists(lua_State* L)
 
 int LuaParser::DontMessWithMyCase(lua_State* L)
 {
+	ZoneScopedN(__FILE__ ":DontMessWithMyCase");
 	LuaParser* currentParser = GetLuaParser(L);
 
 	currentParser->SetLowerKeys(lua_toboolean(L, 1));
@@ -760,6 +803,7 @@ LuaTable::LuaTable()
 
 LuaTable::LuaTable(LuaParser* _parser)
 {
+	ZoneScopedN(__FILE__ ":LuaTable");
 	assert(_parser != nullptr);
 
 	isValid = _parser->IsValid();
@@ -782,6 +826,7 @@ LuaTable::LuaTable(LuaParser* _parser)
 
 LuaTable::LuaTable(const LuaTable& tbl)
 {
+	ZoneScopedN(__FILE__ ":LuaTable");
 	parser = tbl.parser;
 	L      = tbl.L;
 	path   = tbl.path;
@@ -801,6 +846,7 @@ LuaTable::LuaTable(const LuaTable& tbl)
 
 LuaTable& LuaTable::operator=(const LuaTable& tbl)
 {
+	ZoneScopedN(__FILE__ ":operator=");
 	if (parser != nullptr && (refnum != LUA_NOREF) && (parser->currentRef == refnum)) {
 		lua_settop(L, 0);
 		parser->currentRef = LUA_NOREF;
@@ -837,6 +883,7 @@ LuaTable& LuaTable::operator=(const LuaTable& tbl)
 
 LuaTable LuaTable::SubTable(int key) const
 {
+	ZoneScopedN(__FILE__ ":SubTable");
 	LuaTable subTable;
 	char buf[32];
 	SNPRINTF(buf, 32, "[%i]", key);
@@ -864,6 +911,7 @@ LuaTable LuaTable::SubTable(int key) const
 
 LuaTable LuaTable::SubTable(const std::string& mixedKey) const
 {
+	ZoneScopedN(__FILE__ ":SubTable");
 	const std::string key = !((parser != nullptr)? parser->lowerCppKeys : true) ? mixedKey : StringToLower(mixedKey);
 
 	LuaTable subTable;
@@ -891,6 +939,7 @@ LuaTable LuaTable::SubTable(const std::string& mixedKey) const
 
 LuaTable LuaTable::SubTableExpr(const std::string& expr) const
 {
+	ZoneScopedN(__FILE__ ":SubTableExpr");
 	if (expr.empty())
 		return LuaTable(*this);
 
@@ -929,6 +978,7 @@ LuaTable LuaTable::SubTableExpr(const std::string& expr) const
 
 LuaTable::~LuaTable()
 {
+	ZoneScopedN(__FILE__ ":~LuaTable");
 	if (parser != nullptr)
 		parser->RemoveTable(this);
 
@@ -947,6 +997,7 @@ LuaTable::~LuaTable()
 
 bool LuaTable::PushTable() const
 {
+	ZoneScopedN(__FILE__ ":PushTable");
 	if (!isValid)
 		return false;
 
@@ -978,6 +1029,7 @@ bool LuaTable::PushTable() const
 
 bool LuaTable::PushValue(int key) const
 {
+	ZoneScopedN(__FILE__ ":PushValue");
 	if (!PushTable()) {
 		return false;
 	}
@@ -993,6 +1045,7 @@ bool LuaTable::PushValue(int key) const
 
 bool LuaTable::PushValue(const std::string& mixedKey) const
 {
+	ZoneScopedN(__FILE__ ":PushValue");
 	const std::string key = !(parser ? parser->lowerCppKeys : true) ? mixedKey : StringToLower(mixedKey);
 
 	if (!PushTable())
@@ -1080,6 +1133,7 @@ bool LuaTable::PushValue(const std::string& mixedKey) const
 
 bool LuaTable::KeyExists(int key) const
 {
+	ZoneScopedN(__FILE__ ":KeyExists");
 	if (!PushValue(key))
 		return false;
 
@@ -1090,6 +1144,7 @@ bool LuaTable::KeyExists(int key) const
 
 bool LuaTable::KeyExists(const std::string& key) const
 {
+	ZoneScopedN(__FILE__ ":KeyExists");
 	if (!PushValue(key))
 		return false;
 
@@ -1106,6 +1161,7 @@ bool LuaTable::KeyExists(const std::string& key) const
 
 LuaTable::DataType LuaTable::GetType(int key) const
 {
+	ZoneScopedN(__FILE__ ":DataType");
 	if (!PushValue(key))
 		return NIL;
 
@@ -1124,6 +1180,7 @@ LuaTable::DataType LuaTable::GetType(int key) const
 
 LuaTable::DataType LuaTable::GetType(const std::string& key) const
 {
+	ZoneScopedN(__FILE__ ":DataType");
 	if (!PushValue(key))
 		return NIL;
 
@@ -1148,6 +1205,7 @@ LuaTable::DataType LuaTable::GetType(const std::string& key) const
 
 int LuaTable::GetLength() const
 {
+	ZoneScopedN(__FILE__ ":GetLength");
 	if (!PushTable())
 		return 0;
 
@@ -1157,6 +1215,7 @@ int LuaTable::GetLength() const
 
 int LuaTable::GetLength(int key) const
 {
+	ZoneScopedN(__FILE__ ":GetLength");
 	if (!PushValue(key))
 		return 0;
 
@@ -1168,6 +1227,7 @@ int LuaTable::GetLength(int key) const
 
 int LuaTable::GetLength(const std::string& key) const
 {
+	ZoneScopedN(__FILE__ ":GetLength");
 	if (!PushValue(key))
 		return 0;
 
@@ -1185,6 +1245,7 @@ int LuaTable::GetLength(const std::string& key) const
 
 bool LuaTable::GetKeys(std::vector<int>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetKeys");
 	if (!PushTable())
 		return false;
 
@@ -1202,6 +1263,7 @@ bool LuaTable::GetKeys(std::vector<int>& data) const
 
 bool LuaTable::GetKeys(std::vector<std::string>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetKeys");
 	if (!PushTable())
 		return false;
 
@@ -1220,6 +1282,7 @@ bool LuaTable::GetKeys(std::vector<std::string>& data) const
 
 bool LuaTable::GetPairs(std::vector<std::pair<int, std::string>>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetPairs");
 	if (!PushTable())
 		return false;
 
@@ -1248,6 +1311,7 @@ bool LuaTable::GetPairs(std::vector<std::pair<int, std::string>>& data) const
 
 bool LuaTable::GetPairs(std::vector<std::pair<std::string, float>>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetPairs");
 	if (!PushTable())
 		return false;
 
@@ -1269,6 +1333,7 @@ bool LuaTable::GetPairs(std::vector<std::pair<std::string, float>>& data) const
 
 bool LuaTable::GetPairs(std::vector<std::pair<std::string, std::string>>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetPairs");
 	if (!PushTable())
 		return false;
 
@@ -1304,6 +1369,7 @@ bool LuaTable::GetPairs(std::vector<std::pair<std::string, std::string>>& data) 
 
 bool LuaTable::GetMap(spring::unordered_map<int, float>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetMap");
 	if (!PushTable())
 		return false;
 
@@ -1321,6 +1387,7 @@ bool LuaTable::GetMap(spring::unordered_map<int, float>& data) const
 
 bool LuaTable::GetMap(spring::unordered_map<int, std::string>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetMap");
 	if (!PushTable())
 		return false;
 
@@ -1345,6 +1412,7 @@ bool LuaTable::GetMap(spring::unordered_map<int, std::string>& data) const
 
 bool LuaTable::GetMap(spring::unordered_map<std::string, float>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetMap");
 	if (!PushTable())
 		return false;
 
@@ -1362,6 +1430,7 @@ bool LuaTable::GetMap(spring::unordered_map<std::string, float>& data) const
 
 bool LuaTable::GetMap(spring::unordered_map<std::string, std::string>& data) const
 {
+	ZoneScopedN(__FILE__ ":GetMap");
 	if (!PushTable())
 		return false;
 
@@ -1394,6 +1463,7 @@ bool LuaTable::GetMap(spring::unordered_map<std::string, std::string>& data) con
 static bool ParseTableFloat(lua_State* L,
                             int tableIndex, int index, float& value)
 {
+	ZoneScopedN(__FILE__ ":ParseTableFloat");
 	lua_pushnumber(L, index);
 	lua_gettable(L, tableIndex);
 	value = lua_tonumber(L, -1);
@@ -1409,6 +1479,7 @@ static bool ParseTableFloat(lua_State* L,
 
 static bool ParseFloat3(lua_State* L, int index, float3& value)
 {
+	ZoneScopedN(__FILE__ ":ParseFloat3");
 	if (lua_istable(L, index)) {
 		const int table = (index > 0) ? index : lua_gettop(L) + index + 1;
 		if (ParseTableFloat(L, table, 1, value.x) &&
@@ -1427,6 +1498,7 @@ static bool ParseFloat3(lua_State* L, int index, float3& value)
 
 static bool ParseFloat4(lua_State* L, int index, float4& value)
 {
+	ZoneScopedN(__FILE__ ":ParseFloat4");
 	if (lua_istable(L, index)) {
 		const int table = (index > 0) ? index : lua_gettop(L) + index + 1;
 		if (ParseTableFloat(L, table, 1, value.x) &&
@@ -1447,6 +1519,7 @@ static bool ParseFloat4(lua_State* L, int index, float4& value)
 
 static bool ParseBoolean(lua_State* L, int index, bool& value)
 {
+	ZoneScopedN(__FILE__ ":ParseBoolean");
 	if (lua_isboolean(L, index)) {
 		value = lua_toboolean(L, index);
 		return true;
@@ -1478,6 +1551,7 @@ static bool ParseBoolean(lua_State* L, int index, bool& value)
 
 int LuaTable::Get(const std::string& key, int def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1493,6 +1567,7 @@ int LuaTable::Get(const std::string& key, int def) const
 
 bool LuaTable::Get(const std::string& key, bool def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1508,6 +1583,7 @@ bool LuaTable::Get(const std::string& key, bool def) const
 
 float LuaTable::Get(const std::string& key, float def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1524,6 +1600,7 @@ float LuaTable::Get(const std::string& key, float def) const
 
 float3 LuaTable::Get(const std::string& key, const float3& def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1538,6 +1615,7 @@ float3 LuaTable::Get(const std::string& key, const float3& def) const
 
 float4 LuaTable::Get(const std::string& key, const float4& def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1554,6 +1632,7 @@ float4 LuaTable::Get(const std::string& key, const float4& def) const
 
 std::string LuaTable::Get(const std::string& key, const std::string& def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1575,6 +1654,7 @@ std::string LuaTable::Get(const std::string& key, const std::string& def) const
 
 int LuaTable::Get(int key, int def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1590,6 +1670,7 @@ int LuaTable::Get(int key, int def) const
 
 bool LuaTable::Get(int key, bool def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1605,6 +1686,7 @@ bool LuaTable::Get(int key, bool def) const
 
 float LuaTable::Get(int key, float def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1621,6 +1703,7 @@ float LuaTable::Get(int key, float def) const
 
 float3 LuaTable::Get(int key, const float3& def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1635,6 +1718,7 @@ float3 LuaTable::Get(int key, const float3& def) const
 
 float4 LuaTable::Get(int key, const float4& def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key)) {
 		return def;
 	}
@@ -1651,6 +1735,7 @@ float4 LuaTable::Get(int key, const float4& def) const
 
 std::string LuaTable::Get(int key, const std::string& def) const
 {
+	ZoneScopedN(__FILE__ ":Get");
 	if (!PushValue(key))
 		return def;
 
@@ -1672,24 +1757,28 @@ std::string LuaTable::Get(int key, const std::string& def) const
 
 float3 LuaTable::GetFloat3(int key, const float3& def) const
 {
+	ZoneScopedN(__FILE__ ":GetFloat3");
 	return Get(key, def);
 }
 
 
 float4 LuaTable::GetFloat4(int key, const float4& def) const
 {
+	ZoneScopedN(__FILE__ ":GetFloat4");
 	return Get(key, def);
 }
 
 
 float3 LuaTable::GetFloat3(const std::string& key, const float3& def) const
 {
+	ZoneScopedN(__FILE__ ":GetFloat3");
 	return Get(key, def);
 }
 
 
 float4 LuaTable::GetFloat4(const std::string& key, const float4& def) const
 {
+	ZoneScopedN(__FILE__ ":GetFloat4");
 	return Get(key, def);
 }
 

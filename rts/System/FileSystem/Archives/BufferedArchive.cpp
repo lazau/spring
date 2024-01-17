@@ -5,6 +5,7 @@
 #include "System/MainDefines.h"
 #include "System/Log/ILog.h"
 
+
 #include <cassert>
 
 spring::mutex CBufferedArchive::archiveLock;
@@ -21,6 +22,7 @@ CBufferedArchive::~CBufferedArchive()
 
 bool CBufferedArchive::GetFile(unsigned int fid, std::vector<std::uint8_t>& buffer)
 {
+	LOG("CBufferedArchive::GetFile");
 	std::scoped_lock lck(archiveLock);
 	assert(IsFileId(fid));
 

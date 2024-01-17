@@ -11,6 +11,7 @@
 #include "System/StringUtil.h"
 #include "System/Log/ILog.h"
 #include "System/Exceptions.h"
+#include <tracy/Tracy.hpp>
 
 #include <cassert>
 #include <sys/stat.h>
@@ -213,6 +214,7 @@ char FileSystemAbstraction::GetNativePathSeparator()
 
 bool FileSystemAbstraction::IsAbsolutePath(const std::string& path)
 {
+	ZoneScoped;
 	//TODO uncomment this and test if there are conflicts in the code when this returns true but other custom code doesn't (e.g. with IsFSRoot)
 	//const boost::filesystem::path f(file);
 	//return f.is_absolute();

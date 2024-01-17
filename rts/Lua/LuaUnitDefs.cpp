@@ -324,8 +324,9 @@ static int BuildOptions(lua_State* L, const void* data)
 
 static inline int BuildCategorySet(lua_State* L, const vector<string>& cats)
 {
-	lua_newtable(L);
+	//lua_newtable(L);
 	const int count = (int)cats.size();
+	lua_createtable(L, /*narr*/0, /*nrec*/count);
 	for (int i = 0; i < count; i++) {
 		lua_pushsstring(L, cats[i]);
 		lua_pushboolean(L, true);

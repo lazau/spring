@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 
+#include <tracy/Tracy.hpp>
 #include "SimpleParser.h"
 #include "FileHandler.h"
 
@@ -46,6 +47,7 @@ std::string CSimpleParser::GetLine()
 
 std::string CSimpleParser::GetCleanLine()
 {
+	ZoneScoped;
 	std::string::size_type pos;
 	while (true) {
 		if (curPos >= file.size()) {
@@ -74,6 +76,7 @@ std::string CSimpleParser::GetCleanLine()
 
 std::vector<std::string> CSimpleParser::Tokenize(const std::string& line, int minWords)
 {
+	ZoneScoped;
 	std::vector<std::string> words;
 	std::string::size_type start;
 	std::string::size_type end = 0;

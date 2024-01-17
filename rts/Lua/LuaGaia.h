@@ -4,6 +4,7 @@
 #define LUA_GAIA_H
 
 #include <string>
+#include <tracy/Tracy.hpp>
 
 #include "LuaHandleSynced.h"
 
@@ -13,7 +14,10 @@ class CLuaGaia : public CSplitLuaHandle
 public:
 	static bool CanLoadHandler();
 	static bool ReloadHandler() { return (FreeHandler(), LoadFreeHandler()); } // NOTE the ','
-	static bool LoadFreeHandler(bool dryRun = false) { return (LoadHandler(dryRun) || FreeHandler()); }
+	static bool LoadFreeHandler(bool dryRun = false) {
+		ZoneScopedN("LuaGaia::LoadFreeHandler");
+		return (LoadHandler(dryRun) || FreeHandler());
+	}
 
 	static bool LoadHandler(bool dryRun);
 	static bool FreeHandler();

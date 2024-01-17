@@ -3,6 +3,7 @@
 #include "System/Platform/Win/win32.h"
 #include "System/TypeToStr.h"
 #include "Rendering/GlobalRendering.h"
+#include <tracy/Tracy.hpp>
 
 #if defined(__APPLE__) || defined(HEADLESS)
 	// FIXME: no hardware cursor support for macs
@@ -203,6 +204,7 @@ private:
 #endif
 
 IHardwareCursor* IHardwareCursor::Alloc(void* mem) {
+	ZoneScoped;
 #if defined(__APPLE__) || defined(HEADLESS)
 	static_assert(sizeof(HardwareCursorApple  ) <= CMouseCursor::HWC_MEM_SIZE, "");
 	return (new (mem) HardwareCursorApple());
@@ -301,6 +303,7 @@ void HardwareCursorWindows::SetDelay(float delay)
 
 void HardwareCursorWindows::PushFrame(int index, float delay)
 {
+	ZoneScoped;
 	if (index >= imageCount)
 		return;
 
@@ -431,6 +434,7 @@ static inline int GetBestCursorSize(const int minSize)
 
 void HardwareCursorWindows::Finish()
 {
+	ZoneScoped;
 	if (frames.empty())
 		return;
 
@@ -646,6 +650,7 @@ void HardwareCursorX11::SetDelay(float delay)
 
 void HardwareCursorX11::PushFrame(int index, float delay)
 {
+	ZoneScoped;
 	if (index >= int(cimages.size()))
 		return;
 
@@ -662,6 +667,7 @@ void HardwareCursorX11::PushFrame(int index, float delay)
 
 void HardwareCursorX11::Finish()
 {
+	ZoneScoped;
 	if (cimages.empty())
 		return;
 
@@ -724,6 +730,7 @@ void HardwareCursorSDL::PushImage(int xsize, int ysize, const void* mem)
 
 void HardwareCursorSDL::PushFrame(int index, float delay)
 {
+	ZoneScoped;
     if (index >= this->frames.size()) {
         return;
     }
@@ -758,11 +765,13 @@ void HardwareCursorSDL::SetDelay(float delay)
 
 void HardwareCursorSDL::SetHotSpot(CMouseCursor::HotSpot hs)
 {
+	ZoneScoped;
     hotSpot = hs;
 }
 
 void HardwareCursorSDL::Finish()
 {
+	ZoneScoped;
     for (auto &c : this->frames) {
         auto hotx = (hotSpot == CMouseCursor::TopLeft) ? 0 : c.surface->w / 2;
         auto hoty = (hotSpot == CMouseCursor::TopLeft) ? 0 : c.surface->h / 2;

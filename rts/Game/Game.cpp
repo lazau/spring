@@ -92,6 +92,7 @@
 #include "Sim/Units/Scripts/UnitScriptEngine.h"
 #include "Sim/Units/UnitHandler.h"
 #include "Sim/Units/UnitDefHandler.h"
+#include "Sim/Weapons/WeaponDef.h"
 #include "Sim/Weapons/WeaponDefHandler.h"
 #include "Sim/Weapons/WeaponLoader.h"
 #include "UI/CommandColors.h"
@@ -124,6 +125,7 @@
 #include "System/Sound/ISound.h"
 #include "System/Sound/ISoundChannels.h"
 #include "System/Sync/DumpState.h"
+#include "System/Threading/SpringThreading.h"
 #include "System/TimeProfiler.h"
 #include "System/LoadLock.h"
 
@@ -353,6 +355,7 @@ void CGame::AddTimedJobs()
 
 void CGame::Load(const std::string& mapFileName)
 {
+	//LOG("lazau:DELETE! WeaponDefs size %lu", sizeof(WeaponDefs));
 	// NOTE:
 	//   this is needed for LuaHandle::CallOut*UpdateCallIn
 	//   the main-thread is NOT the same as the load-thread
@@ -373,10 +376,24 @@ void CGame::Load(const std::string& mapFileName)
 	try {
 		LOG("[Game::%s][1] globalQuit=%d threaded=%d", __func__, globalQuit.load(), !Threading::IsMainThread());
 
+		//spring::threading loadMap([this, &mapFileName]() {
+		//		Threading::SetThreadName("Game::LoadMap");
+		//		this->LoadMap(mapFileName);
+		//		Watchdog::ClearTimer(WDT_LOAD);
+		//		});
+		//spring::thread loadDefs([this, defsParser]() {
+		//		Threading::SetThreadName("Game::LoadDefs");
+		//		this->LoadDefs(defsParser);
+		//		Watchdog::ClearTimer(WDT_LOAD);
+		//		});
+		PrepareLoadScreenAssets();
 		LoadMap(mapFileName);
 		Watchdog::ClearTimer(WDT_LOAD);
 		LoadDefs(defsParser);
 		Watchdog::ClearTimer(WDT_LOAD);
+
+		//loadMap.join();
+		//loadDefs.join();
 	} catch (const content_error& e) {
 		LOG_L(L_WARNING, "[Game::%s][1] forced quit with exception \"%s\"", __func__, e.what());
 
@@ -512,6 +529,14 @@ void CGame::Load(const std::string& mapFileName)
 
 	loadDone = true;
 	globalQuit = globalQuit | forcedQuit;
+  // DONOTSUBMIT: globalQuit after load.
+  globalQuit = true;
+}
+
+
+void CGame::PrepareLoadScreenAssets() const {
+	SCOPED_ONCE_TIMER("Game::PrepareLoadScreenAssets");
+	loadscreen->SetLoadMessage("Preparing Load Screen Assets");
 }
 
 
@@ -541,11 +566,12 @@ void CGame::LoadMap(const std::string& mapFileName)
 
 void CGame::LoadDefs(LuaParser* defsParser)
 {
+	SCOPED_ONCE_TIMER("Game::LoadDefs");
 	ENTER_SYNCED_CODE();
 
 	{
 		SCOPED_ONCE_TIMER("Game::LoadDefs (GameData)");
-		loadscreen->SetLoadMessage("Loading GameData Definitions");
+		//loadscreen->SetLoadMessage("Loading GameData Definitions");
 
 		defsParser->SetupLua(true, true);
 		// customize the defs environment; LuaParser has no access to LuaSyncedRead
@@ -583,6 +609,7 @@ void CGame::LoadDefs(LuaParser* defsParser)
 	}
 
 	{
+		SCOPED_ONCE_TIMER("Game::LoadDefs (Radar Icons)");
 		loadscreen->SetLoadMessage("Loading Radar Icons");
 		auto lock = CLoadLock::GetUniqueLock();
 		icon::iconHandler.Init();
@@ -1821,6 +1848,7 @@ void CGame::GameEnd(const std::vector<unsigned char>& winningAllyTeams, bool tim
 #ifdef    HEADLESS
 	CTimeProfiler::GetInstance().PrintProfilingInfo();
 #endif // HEADLESS
+	CTimeProfiler::GetInstance().PrintProfilingInfo();
 
 	CDemoRecorder* record = clientNet->GetDemoRecorder();
 

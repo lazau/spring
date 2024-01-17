@@ -1126,6 +1126,7 @@ int32_t CBitmap::GetIntFmt() const { return 0; }
 
 bool CBitmap::Load(std::string const& filename, float defaultAlpha, uint32_t reqChannel, uint32_t reqDataType, bool forceReplaceAlpha)
 {
+	ZoneScopedN("CBitmap::Load");
 	bool isLoaded = false;
 	bool isValid  = false;
 	bool hasAlpha = false;
@@ -1219,6 +1220,7 @@ bool CBitmap::Load(std::string const& filename, float defaultAlpha, uint32_t req
 
 		ILint currFormat;
 		{
+			ZoneScopedN("ilLoadL");
 			// do not signal floating point exceptions in devil library
 			ScopedDisableFpuExceptions fe;
 
@@ -1280,6 +1282,7 @@ bool CBitmap::Load(std::string const& filename, float defaultAlpha, uint32_t req
 		}
 
 		if (isValid) {
+			ZoneScopedN("CBitmap::Load-ilConvertImage");
 			{
 				// conditional transformation
 				ILenum dstFormat;
@@ -1554,6 +1557,7 @@ bool CBitmap::SaveFloat(std::string const& filename) const
 		fclose(file);
 	}
 
+
 	ilDeleteImages(1, &imageID);
 	return success;
 }
@@ -1562,8 +1566,11 @@ bool CBitmap::SaveFloat(std::string const& filename) const
 #ifndef HEADLESS
 unsigned int CBitmap::CreateTexture(float aniso, float lodBias, bool mipmaps, uint32_t texID) const
 {
-	if (compressed)
+	ZoneScoped;
+	if (compressed) {
+		ZoneScopedN("Bitmap::CreateTexture-Createcompressed(DDS)");
 		return CreateDDSTexture(texID, aniso, lodBias, mipmaps);
+	}
 
 	if (GetMemSize() == 0)
 		return 0;
@@ -1572,6 +1579,7 @@ unsigned int CBitmap::CreateTexture(float aniso, float lodBias, bool mipmaps, ui
 	// but switch to software rendering for non-power-of-two textures.
 	// GL_ARB_texture_non_power_of_two indicates that the hardware will actually support it.
 	if (!globalRendering->supportNonPowerOfTwoTex && (xsize != next_power_of_2(xsize) || ysize != next_power_of_2(ysize))) {
+		ZoneScopedN("Bitmap::CreateTexture-CreateRescaled");
 		CBitmap bm = CreateRescaled(next_power_of_2(xsize), next_power_of_2(ysize));
 		return bm.CreateTexture(aniso, mipmaps);
 	}
@@ -1591,6 +1599,7 @@ unsigned int CBitmap::CreateTexture(float aniso, float lodBias, bool mipmaps, ui
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, aniso);
 
 	if (mipmaps) {
+		ZoneScopedN("Bitmap::CreateTexture-glBuildMipmaps");
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glBuildMipmaps(GL_TEXTURE_2D, GetIntFmt(), xsize, ysize, GetExtFmt(), dataType, GetRawMem());
 	} else {
@@ -1604,6 +1613,7 @@ unsigned int CBitmap::CreateTexture(float aniso, float lodBias, bool mipmaps, ui
 
 static void HandleDDSMipmap(GLenum target, bool mipmaps, int num_mipmaps)
 {
+	ZoneScoped;
 	if (num_mipmaps > 0) {
 		// dds included the MipMaps use them
 		glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -1621,6 +1631,7 @@ static void HandleDDSMipmap(GLenum target, bool mipmaps, int num_mipmaps)
 
 unsigned int CBitmap::CreateDDSTexture(unsigned int texID, float aniso, float lodBias, bool mipmaps) const
 {
+	ZoneScoped;
 	glPushAttrib(GL_TEXTURE_BIT);
 
 	if (texID == 0)

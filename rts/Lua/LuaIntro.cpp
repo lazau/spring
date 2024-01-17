@@ -330,12 +330,16 @@ void CLuaIntro::DrawLoadScreen()
 		//LuaOpenGL::DisableCommon(LuaOpenGL::DRAW_SCREEN);
 		return; // the call is not defined
 	}
+  LOG("LuaIntro::DrawLoadScreen: cmdStr = %s", cmdStr.GetString());
 
 	LuaOpenGL::SetDrawingEnabled(L, true);
 	LuaOpenGL::EnableCommon(LuaOpenGL::DRAW_SCREEN);
 
-	// call the routine
-	RunCallIn(L, cmdStr, 0, 0);
+  {
+    ZoneScopedN("RunCallIn");
+    // call the routine
+    RunCallIn(L, cmdStr, 0, 0);
+  }
 
 	LuaOpenGL::DisableCommon(LuaOpenGL::DRAW_SCREEN);
 	LuaOpenGL::SetDrawingEnabled(L, false);

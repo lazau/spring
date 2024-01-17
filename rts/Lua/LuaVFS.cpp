@@ -143,9 +143,7 @@ int LuaVFS::Include(lua_State* L, bool synced)
 	const std::string fileName = luaL_checkstring(L, 1);
 	      std::string fileData;
 
-	#if 0
 	ScopedOnceTimer timer("LuaVFS::Include(" + fileName + ")");
-	#endif
 
 	// the path may point to a file or dir outside of any data-dir
 	// if (!LuaIO::IsSimplePath(fileName)) return 0;
@@ -172,7 +170,7 @@ int LuaVFS::Include(lua_State* L, bool synced)
  		lua_error(L);
 	}
 
-	tracy::LuaRemove(fileData.data());
+	//tracy::LuaRemove(fileData.data());
 	if ((luaError = luaL_loadbuffer(L, fileData.c_str(), fileData.size(), fileName.c_str())) != 0) {
 		const auto buf = fmt::format("[LuaVFS::{}(synced={})][loadbuf] file={} error={} ({}) cenv={} vfsmode={}", __func__, synced, fileName, luaError, lua_tostring(L, -1), hasCustomEnv, mode);
 		lua_pushlstring(L, buf.c_str(), buf.size());

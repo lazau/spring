@@ -164,6 +164,7 @@
 #include <cstring>
 #include <cassert>
 
+#include <tracy/Tracy.hpp>
 // spring related
 #include "Rendering/GL/myGL.h"
 #include "nv_dds.h"
@@ -849,6 +850,7 @@ bool CDDSImage::upload_texture2D(unsigned int imageIndex, int target) const
 // uploads a compressed/uncompressed 3D texture
 bool CDDSImage::upload_texture3D() const
 {
+	ZoneScoped;
     assert(m_valid);
     assert(!m_images.empty());
     assert(m_type == Texture3D);
@@ -904,6 +906,7 @@ bool CDDSImage::upload_texture3D() const
 
 bool CDDSImage::upload_textureRectangle() const
 {
+	ZoneScoped;
     return upload_texture2D(0, GL_TEXTURE_RECTANGLE_NV);
 }
 
@@ -911,6 +914,7 @@ bool CDDSImage::upload_textureRectangle() const
 // uploads a compressed/uncompressed cubemap texture
 bool CDDSImage::upload_textureCubemap() const
 {
+	ZoneScoped;
     assert(m_valid);
     assert(!m_images.empty());
     assert(m_type == TextureCubemap);

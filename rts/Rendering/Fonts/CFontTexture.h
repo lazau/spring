@@ -174,6 +174,7 @@ protected:
 
 	std::unique_ptr<CglFontRenderer> fontRenderer;
 private:
+  std::string fontfile_;
 #ifndef HEADLESS
 	int curTextureUpdate = 0;
 	int lastTextureUpdate = 0;

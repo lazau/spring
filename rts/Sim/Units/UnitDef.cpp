@@ -1,4 +1,5 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
+#include <tracy/Tracy.hpp>
 
 #include "UnitDef.h"
 #include "UnitDefHandler.h"
@@ -262,6 +263,7 @@ UnitDef::UnitDef()
 
 UnitDef::UnitDef(const LuaTable& udTable, const std::string& unitName, int id)
 {
+	ZoneScoped;
 	// rely on default-ctor to initialize all members
 	*this = UnitDef();
 	this->id = id;

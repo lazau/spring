@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include <cctype>
+#include <tracy/Tracy.hpp>
 
 #include "LuaOpenGLUtils.h"
 
@@ -338,6 +339,7 @@ static bool ParseNamedSubTexture(LuaMatTexture& texUnit, const std::string& texN
 
 bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, const std::string& image)
 {
+  ZoneScoped;
 	// NOTE: current formats:
 	//
 	// #12          --  unitDef 12 buildpic
@@ -467,8 +469,11 @@ bool LuaOpenGLUtils::ParseTextureImage(lua_State* L, LuaMatTexture& texUnit, con
 		} break;
 
 		default: {
+               ZoneScopedN("Default texture");
 			const CLuaHandle* luaHandle = CLuaHandle::GetHandle(L);
+      LOG("CNamedTextures GetInfo");
 			const CNamedTextures::TexInfo* texInfo = CNamedTextures::GetInfo(image, true, luaHandle->PersistOnReload(), luaHandle->SecondaryGLContext());
+      LOG("CNamedTextures GetInfo Done");
 
 			if (texInfo != nullptr) {
 				texUnit.type = LuaMatTexture::LUATEX_NAMED;

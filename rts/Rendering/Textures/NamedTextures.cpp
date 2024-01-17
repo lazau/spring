@@ -2,6 +2,7 @@
 
 // must be included before streflop! else we get streflop/cmath resolve conflicts in its hash implementation files
 #include <vector>
+#include <tracy/Tracy.hpp>
 #include "NamedTextures.h"
 
 #include "Rendering/GL/myGL.h"
@@ -145,6 +146,8 @@ namespace CNamedTextures {
 
 	static bool Load(const std::string& texName, unsigned int texID, bool genInsert)
 	{
+    ZoneScoped;
+    LOG("NamedTextures::Load %s", texName.c_str());
 		// strip off the qualifiers
 		std::string filename = texName;
 		bool border  = false;
@@ -377,6 +380,8 @@ namespace CNamedTextures {
 	const TexInfo* GetInfo(size_t texIdx) { return &texInfoVec[texIdx]; }
 	const TexInfo* GetInfo(const std::string& texName, bool forceLoad, bool persist, bool secondaryGLContext)
 	{
+    ZoneScoped;
+    LOG("NamedTexture::GetInfo %s", texName.c_str());
 		if (texName.empty())
 			return nullptr;
 
@@ -388,15 +393,19 @@ namespace CNamedTextures {
 		}
 
 		if (forceLoad) {
+      LOG("NamedTexture::GetInfo force loading");
 			// load texture
 			GLboolean inListCompile;
 			glGetBooleanv(GL_LIST_INDEX, &inListCompile);
+      LOG("NamedTexture::GetInfo inListCompile %s", inListCompile ? "true" : "false");
+			// load texture
 
 			if (inListCompile) {
 				GenInsertTex(texName, {}, true, secondaryGLContext, false, persist);
 			} else {
 				GenLoadTex(texName);
 			}
+      LOG("GenLoaded/InsertedText");
 
 			return &texInfoVec[ texInfoMap[texName] ];
 		}

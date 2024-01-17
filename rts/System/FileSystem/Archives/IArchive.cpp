@@ -3,6 +3,7 @@
 #include "IArchive.h"
 
 #include "System/StringUtil.h"
+#include "System/Log/ILog.h"
 
 unsigned int IArchive::FindFile(const std::string& filePath) const
 {
@@ -30,6 +31,7 @@ bool IArchive::CalcHash(uint32_t fid, uint8_t hash[sha512::SHA_LEN], std::vector
 
 bool IArchive::GetFile(const std::string& name, std::vector<std::uint8_t>& buffer)
 {
+	LOG("IArchive::GetFile");
 	const unsigned int fid = FindFile(name);
 
 	if (!IsFileId(fid))

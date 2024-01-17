@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cctype>
+#include <tracy/Tracy.hpp>
 
 #include "LuaWeaponDefs.h"
 
@@ -264,6 +265,7 @@ static int DamagesArray(lua_State* L, const void* data)
 
 static int VisualsTable(lua_State* L, const void* data)
 {
+	ZoneScoped;
 	const struct WeaponDef::Visuals& v = *static_cast<const struct WeaponDef::Visuals*>(data);
 	lua_createtable(L, 0, 28);
 	HSTR_PUSH_STRING(L, "modelName",            modelLoader.FindModelPath(v.modelName));
@@ -379,6 +381,7 @@ static int CategorySetFromBits(lua_State* L, const void* data)
 
 static int CustomParamsTable(lua_State* L, const void* data)
 {
+	ZoneScoped;
 	const spring::unordered_map<std::string, std::string>& params = *((const spring::unordered_map<std::string, std::string>*)data);
 	lua_createtable(L, 0, params.size());
 

@@ -2,6 +2,7 @@
 
 
 #include <array>
+#include <tracy/Tracy.hpp>
 #include <cstring>
 
 #include "System/bitops.h"
@@ -25,6 +26,7 @@ CMouseCursor::CMouseCursor(const std::string& name_, HotSpot hs)
 	: name(name_)
 	, hotSpot(hs)
 {
+	ZoneScoped;
 	frames.reserve(8);
 	images.reserve(8);
 
@@ -89,6 +91,7 @@ CMouseCursor& CMouseCursor::operator = (CMouseCursor&& mc) noexcept {
 
 bool CMouseCursor::Build(const std::string& name)
 {
+	ZoneScoped;
 	int lastFrame = 1000;
 
 	hwCursor = IHardwareCursor::Alloc(hwCursorMem);
@@ -104,6 +107,7 @@ bool CMouseCursor::Build(const std::string& name)
 
 bool CMouseCursor::BuildFromSpecFile(const std::string& name, int& lastFrame)
 {
+	ZoneScoped;
 	const std::string specFileName = "anims/" + name + ".txt";
 
 	if (!CFileHandler::FileExists(specFileName, SPRING_VFS_RAW_FIRST))
@@ -128,6 +132,7 @@ bool CMouseCursor::BuildFromSpecFile(const std::string& name, int& lastFrame)
 		}
 
 		if ((cmdIter->second == 0) && (words.size() >= 2)) {
+			ZoneScopedN("cmdIter->second == 0");
 			const std::string& imageName = words[1];
 			float length = MIN_FRAME_LENGTH;
 
@@ -142,6 +147,8 @@ bool CMouseCursor::BuildFromSpecFile(const std::string& name, int& lastFrame)
 				continue;
 			}
 
+			{
+			ZoneScopedN("cmdIter->second == 0; image load");
 			ImageData image;
 
 			if (LoadCursorImage(imageName, image)) {
@@ -151,11 +158,13 @@ bool CMouseCursor::BuildFromSpecFile(const std::string& name, int& lastFrame)
 				images.push_back(image);
 				frames.emplace_back(images.size() - 1, length);
 			}
+			}
 
 			continue;
 		}
 
 		if ((cmdIter->second == 1) && (!words.empty())) {
+			ZoneScopedN("cmdIter->second == 1");
 			if (words[1] == "topleft") {
 				hwCursor->SetHotSpot(hotSpot = TopLeft);
 				continue;
@@ -170,6 +179,7 @@ bool CMouseCursor::BuildFromSpecFile(const std::string& name, int& lastFrame)
 		}
 
 		if ((cmdIter->second == 2) && (!words.empty())) {
+			ZoneScopedN("cmdIter->second == 2");
 			lastFrame = atoi(words[1].c_str());
 			continue;
 		}
@@ -181,6 +191,7 @@ bool CMouseCursor::BuildFromSpecFile(const std::string& name, int& lastFrame)
 
 bool CMouseCursor::BuildFromFileNames(const std::string& name, int lastFrame)
 {
+	ZoneScoped;
 	// find the image file type to use
 	const char* ext = "";
 	const char* exts[] = {"png", "tga", "bmp"};
@@ -258,8 +269,12 @@ bool CMouseCursor::LoadDummyImage()
 
 bool CMouseCursor::LoadCursorImage(const std::string& name, ImageData& image)
 {
+	ZoneScoped;
+	{
+	ZoneScopedN("FileExists?");
 	if (!CFileHandler::FileExists(name, SPRING_VFS_RAW_FIRST))
 		return false;
+	}
 
 	CBitmap b;
 	if (!b.Load(name)) {
@@ -285,6 +300,8 @@ bool CMouseCursor::LoadCursorImage(const std::string& name, ImageData& image)
 	const int nx = next_power_of_2(b.xsize);
 	const int ny = next_power_of_2(b.ysize);
 
+	{
+	ZoneScopedN("CMouseCursor::LoadCursorImage:realloc");
 	if (b.xsize != nx || b.ysize != ny) {
 		CBitmap bn;
 		bn.Alloc(nx, ny);
@@ -301,6 +318,7 @@ bool CMouseCursor::LoadCursorImage(const std::string& name, ImageData& image)
 		image.yOrigSize = b.ysize;
 		image.xAlignedSize = b.xsize;
 		image.yAlignedSize = b.ysize;
+	}
 	}
 
 	return true;

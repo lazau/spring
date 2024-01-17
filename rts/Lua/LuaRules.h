@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 #include "LuaHandleSynced.h"
 #include "System/UnorderedMap.hpp"
@@ -28,7 +29,10 @@ class CLuaRules : public CSplitLuaHandle
 public:
 	static bool CanLoadHandler() { return true; }
 	static bool ReloadHandler() { return (FreeHandler(), LoadFreeHandler()); } // NOTE the ','
-	static bool LoadFreeHandler(bool dryRun = false) { return (LoadHandler(dryRun) || FreeHandler()); }
+	static bool LoadFreeHandler(bool dryRun = false) {
+		ZoneScopedN("LuaRules::LoadFreeHandler");
+		return (LoadHandler(dryRun) || FreeHandler());
+	}
 
 	static bool LoadHandler(bool dryRun);
 	static bool FreeHandler();

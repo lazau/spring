@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <string_view>
+#include <tracy/Tracy.hpp>
 
 #include "IModelParser.h"
 #include "3DOParser.h"
@@ -181,6 +182,7 @@ void CModelLoader::KillParsers() const
 
 std::string CModelLoader::FindModelPath(std::string name) const
 {
+	ZoneScoped;
 	// check for empty string because we can be called
 	// from Lua*Defs and certain features have no models
 	if (name.empty())
@@ -256,6 +258,8 @@ void CModelLoader::LogErrors()
 
 S3DModel* CModelLoader::LoadModel(std::string name, bool preload)
 {
+	ZoneScoped;
+	LOG("Loading model %s.", name.c_str());
 	// cannot happen except through SpawnProjectile
 	if (name.empty())
 		return nullptr;
@@ -293,6 +297,7 @@ S3DModel* CModelLoader::LoadModel(std::string name, bool preload)
 
 S3DModel* CModelLoader::GetCachedModel(std::string fullName)
 {
+	ZoneScoped;
 	// caller has mutex lock
 
 	static const auto CompPred = [](auto&& lhs, auto&& rhs) { return lhs.first < rhs.first; };
@@ -394,6 +399,7 @@ IModelParser* CModelLoader::GetFormatParser(const std::string& pathExt)
 
 void CModelLoader::ParseModel(S3DModel& model, const std::string& name, const std::string& path)
 {
+	ZoneScoped;
 	IModelParser* parser = GetFormatParser(FileSystem::GetExtension(path));
 
 	if (parser == nullptr) {

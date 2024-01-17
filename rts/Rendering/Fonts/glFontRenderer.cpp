@@ -1,5 +1,7 @@
 #include "glFontRenderer.h"
 
+#include <tracy/Tracy.hpp>
+
 #include "glFont.h"
 #include "Rendering/GlobalRendering.h"
 #include "Rendering/Shaders/Shader.h"
@@ -46,6 +48,7 @@ void main() {
 
 	float alpha = texture(tex, vUV / texSize).x;
 	outColor = vec4(vCol.r, vCol.g, vCol.b, vCol.a * alpha);
+	//outColor = vec4(vCol.r, vCol.g, vCol.b, vCol.a);
 }
 )";
 
@@ -146,6 +149,7 @@ void CglShaderFontRenderer::DrawTraingleElements()
 
 void CglShaderFontRenderer::HandleTextureUpdate(CFontTexture& fnt, bool onlyUpload)
 {
+  ZoneScoped;
 	if (!onlyUpload)
 		fnt.UpdateGlyphAtlasTexture();
 
@@ -268,6 +272,7 @@ void CglNoShaderFontRenderer::DrawTraingleElements()
 
 void CglNoShaderFontRenderer::HandleTextureUpdate(CFontTexture& fnt, bool onlyUpload)
 {
+  ZoneScoped;
 	if (!onlyUpload)
 		fnt.UpdateGlyphAtlasTexture();
 
@@ -330,12 +335,18 @@ std::unique_ptr<CglFontRenderer> CglFontRenderer::CreateInstance()
 {
 #ifndef HEADLESS
 	//return std::make_unique<CglNoShaderFontRenderer>();
-	if (globalRendering->amdHacks)
+	if (globalRendering->amdHacks) {
+    LOG("[CglFontRenderer::CreateInstance] amdHacks: true");
 		return std::make_unique<CglNoShaderFontRenderer>();
+  }
 
-	auto fr = std::make_unique<CglShaderFontRenderer>();
-	if (fr->IsValid())
-		return fr;
+  LOG("[CglFontRenderer::CreateInstance] amdHacks: false");
+  auto fr = std::make_unique<CglShaderFontRenderer>();
+  if (fr->IsValid()) {
+    LOG("[CglFontRenderer::CreateInstance] CglShaderFontRenderer Valid");
+    return fr;
+  }
+  LOG("[CglFontRenderer::CreateInstance] CglShaderFontRenderer Invalid, using noShader");
 
 	fr = nullptr;
 	return std::make_unique<CglNoShaderFontRenderer>();

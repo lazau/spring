@@ -77,6 +77,13 @@ include_directories(${engineIncludes})
 add_executable(engine-legacy ${EXE_FLAGS} ${engineSources} ${ENGINE_ICON} ${engineHeaders})
 target_link_libraries(engine-legacy ${engineLibraries})
 
+# DONOTSUBMIT(lazau): Uncomment to enable tsan build.
+#add_executable(engine-legacy-tsan ${EXE_FLAGS} ${engineSources} ${ENGINE_ICON} ${engineHeaders})
+#target_link_libraries(engine-legacy-tsan ${engineLibraries})
+#target_compile_options(engine-legacy-tsan PRIVATE -fsanitize=thread)
+#target_link_options(engine-legacy-tsan PRIVATE -fsanitize=thread)
+#set_target_properties(engine-legacy-tsan PROPERTIES OUTPUT_NAME "spring-tsan")
+#install(TARGETS engine-legacy-tsan DESTINATION ${BINDIR})
 
 ### Install the executable
 install(TARGETS engine-legacy DESTINATION ${BINDIR})

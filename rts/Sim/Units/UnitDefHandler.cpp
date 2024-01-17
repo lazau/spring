@@ -5,6 +5,7 @@
 #include <iostream>
 #include <locale>
 #include <cctype>
+#include <tracy/Tracy.hpp>
 
 #include "UnitDefHandler.h"
 #include "UnitDef.h"
@@ -28,6 +29,7 @@ bool isblank(int c) {
 
 void CUnitDefHandler::Init(LuaParser* defsParser)
 {
+	ZoneScopedN("CUnitDefHandler::Init");
 	noCost = false;
 
 	const LuaTable& rootTable = defsParser->GetRoot().SubTable("UnitDefs");
@@ -58,6 +60,7 @@ void CUnitDefHandler::Init(LuaParser* defsParser)
 
 int CUnitDefHandler::PushNewUnitDef(const std::string& unitName, const LuaTable& udTable)
 {
+	ZoneScoped;
 	if (std::find_if(unitName.begin(), unitName.end(), isblank) != unitName.end())
 		LOG_L(L_WARNING, "[%s] UnitDef name \"%s\" contains white-spaces", __func__, unitName.c_str());
 
@@ -89,6 +92,7 @@ int CUnitDefHandler::PushNewUnitDef(const std::string& unitName, const LuaTable&
 
 void CUnitDefHandler::CleanBuildOptions()
 {
+	ZoneScoped;
 	std::vector<int> eraseOpts;
 
 	// remove invalid build options
@@ -118,6 +122,7 @@ void CUnitDefHandler::CleanBuildOptions()
 
 void CUnitDefHandler::ProcessDecoys()
 {
+	ZoneScoped;
 	// assign the decoy pointers, and build the decoy map
 	for (const auto& p: decoyNameMap) {
 		const auto fakeIt = unitDefIDs.find(p.first);
@@ -149,6 +154,7 @@ void CUnitDefHandler::ProcessDecoys()
 
 void CUnitDefHandler::UnitDefLoadSounds(UnitDef* ud, const LuaTable& udTable)
 {
+	ZoneScoped;
 	LuaTable soundsTable = udTable.SubTable("sounds");
 
 	LoadSounds(soundsTable, ud->sounds.ok,          "ok");      // eg. "ok1", "ok2", ...

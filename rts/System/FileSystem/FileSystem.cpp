@@ -9,6 +9,7 @@
 #include "System/Log/ILog.h"
 #include "System/Platform/Win/win32.h"
 #include "System/StringUtil.h"
+#include <tracy/Tracy.hpp>
 
 #include "System/SpringRegex.h"
 
@@ -217,6 +218,7 @@ std::string FileSystem::GetExtension(const std::string& path)
 
 
 std::string FileSystem::GetNormalizedPath(const std::string& path) {
+	ZoneScoped;
 
 	std::string normalizedPath = StringReplace(path, "\\", "/"); // convert to POSIX path separators
 

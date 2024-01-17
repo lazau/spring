@@ -5,6 +5,8 @@
 
 #include <assert.h>
 #include <fstream>
+#include "System/Log/ILog.h"
+
 
 #include "System/FileSystem/DataDirsAccess.h"
 #include "System/FileSystem/FileSystem.h"
@@ -44,6 +46,7 @@ CDirArchive::CDirArchive(const std::string& archiveName)
 
 bool CDirArchive::GetFile(unsigned int fid, std::vector<std::uint8_t>& buffer)
 {
+	LOG("CDirArchive::GetFile");
 	assert(IsFileId(fid));
 
 	const std::string rawpath = dataDirsAccess.LocateFile(dirName + searchFiles[fid]);

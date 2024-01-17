@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <tracy/Tracy.hpp>
 
 #include "ArchiveLoader.h"
 #include "ArchiveScanner.h"
@@ -60,6 +61,7 @@ void CVFSHandler::SetGlobalInstance(CVFSHandler* handler)
 }
 void CVFSHandler::SetGlobalInstanceRaw(CVFSHandler* handler)
 {
+  ZoneScopedS(10);
 	const char* curHandlerName = (vfs != nullptr)? vfs->GetName(): "null";
 	const char* newHandlerName = handler->GetName();
 
@@ -413,6 +415,7 @@ std::string CVFSHandler::GetNormalizedPath(const std::string& rawPath)
 
 CVFSHandler::FileData CVFSHandler::GetFileData(const std::string& normalizedFilePath, Section section) const
 {
+	ZoneScoped;
 	assert(section < Section::Count);
 	std::lock_guard<decltype(vfsMutex)> lck(vfsMutex);
 
@@ -446,6 +449,7 @@ CVFSHandler::FileData CVFSHandler::GetFileData(const std::string& normalizedFile
 
 int CVFSHandler::LoadFile(const std::string& filePath, std::vector<std::uint8_t>& buffer, Section section)
 {
+	ZoneScoped;
 	LOG_L(L_DEBUG, "[%s::%s<this=%p>(filePath=\"%s\", section=%d)]", vfsName, __func__, this, filePath.c_str(), section);
 
 	const std::string& normalizedPath = GetNormalizedPath(filePath);
@@ -460,6 +464,7 @@ int CVFSHandler::LoadFile(const std::string& filePath, std::vector<std::uint8_t>
 
 int CVFSHandler::FileExists(const std::string& filePath, Section section)
 {
+	ZoneScoped;
 	LOG_L(L_DEBUG, "[%s::%s<this=%p>(filePath=\"%s\", section=%d)]", vfsName, __func__, this, filePath.c_str(), section);
 
 	const std::string& normalizedPath = GetNormalizedPath(filePath);

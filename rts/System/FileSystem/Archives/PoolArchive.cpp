@@ -3,6 +3,7 @@
 
 #include "PoolArchive.h"
 
+
 #include <algorithm>
 #include <stdexcept>
 #include <sstream>
@@ -125,6 +126,7 @@ CPoolArchive::~CPoolArchive()
 
 int CPoolArchive::GetFileImpl(unsigned int fid, std::vector<std::uint8_t>& buffer)
 {
+	LOG("CPoolArchive::GetFile");
 	assert(IsFileId(fid));
 
 	FileData* f = &files[fid];

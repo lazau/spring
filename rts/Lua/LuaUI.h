@@ -5,6 +5,7 @@
 
 #include <string>
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 #include "LuaHandle.h"
 #include "System/UnorderedMap.hpp"
@@ -48,7 +49,10 @@ public:
 
 	static bool CanLoadHandler() { return true; }
 	static bool ReloadHandler() { return (FreeHandler(), LoadFreeHandler()); } // NOTE the ','
-	static bool LoadFreeHandler() { return (LoadHandler() || FreeHandler()); }
+	static bool LoadFreeHandler() {
+		ZoneScopedN("LuaUI::LoadFreeHandler");
+		return (LoadHandler() || FreeHandler());
+	}
 
 	static bool LoadHandler();
 	static bool FreeHandler();

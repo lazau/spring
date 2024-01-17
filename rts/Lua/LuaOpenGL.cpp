@@ -13,6 +13,7 @@
 #include <vector>
 #include <algorithm>
 #include <optional>
+#include <tracy/Tracy.hpp>
 
 #include "lib/fmt/format.h"
 
@@ -3503,6 +3504,7 @@ int LuaOpenGL::DeleteTextureFBO(lua_State* L)
 
 int LuaOpenGL::TextureInfo(lua_State* L)
 {
+  ZoneScoped;
 	LuaMatTexture tex;
 
 	if (!LuaOpenGLUtils::ParseTextureImage(L, tex, luaL_checkstring(L, 1)))

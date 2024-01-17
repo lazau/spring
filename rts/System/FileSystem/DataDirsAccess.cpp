@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include <tracy/Tracy.hpp>
 #include "DataDirsAccess.h"
 #include "DataDirLocater.h"
 #include "FileHandler.h"
@@ -84,6 +85,7 @@ void DataDirsAccess::FindFilesSingleDir(std::vector<std::string>& matches, const
 
 std::string DataDirsAccess::LocateFile(std::string file, int flags) const
 {
+	ZoneScoped;
 	if (!FileSystem::CheckFile(file)) {
 		return "";
 	}

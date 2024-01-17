@@ -7,6 +7,7 @@
 #include <locale>
 #include <cctype>
 #include <cmath>
+#include <tracy/Tracy.hpp>
 
 #include "Rendering/GL/myGL.h"
 #include "Rendering/GL/RenderBuffers.h"
@@ -92,6 +93,7 @@ bool CIconHandler::AddIcon(
 	float distance,
 	bool radAdj
 ) {
+	ZoneScoped;
 	if (numIcons == iconData.size()) {
 		LOG_L(L_DEBUG, "[IconHandler::%s] too many icons added (maximum=%u)", __func__, numIcons);
 		return false;
@@ -104,9 +106,11 @@ bool CIconHandler::AddIcon(
 	bool ownTexture = true;
 
 	try {
+		ZoneScopedN("IconHandler::AddIcon-BitmapLoad");
 		CBitmap bitmap;
 
 		if ((ownTexture = !texName.empty() && bitmap.Load(texName))) {
+			ZoneScopedN("IconHandler::AddIcon-glBind");
 			texID = bitmap.CreateMipMapTexture();
 
 			glBindTexture(GL_TEXTURE_2D, texID);
@@ -115,6 +119,7 @@ bool CIconHandler::AddIcon(
 			xsize = bitmap.xsize;
 			ysize = bitmap.ysize;
 		} else {
+			ZoneScopedN("IconHandler::AddIcon-glBind(default)");
 			texID = GetDefaultTexture();
 			xsize = DEFAULT_TEX_SIZE_X;
 			ysize = DEFAULT_TEX_SIZE_Y;
@@ -125,6 +130,8 @@ bool CIconHandler::AddIcon(
 		return false;
 	}
 
+	{
+	ZoneScopedN("IconHandler::AddIcon-iconData&iconMap");
 	const auto it = iconMap.find(iconName);
 
 	if (it != iconMap.end())
@@ -138,6 +145,7 @@ bool CIconHandler::AddIcon(
 	if (iconName == "default") {
 		dummyIconData[DEFAULT_DATA_IDX].CopyData(&iconData[numIcons - 1]);
 		dummyIconData[DEFAULT_DATA_IDX].SwapOwner(&iconData[numIcons - 1]);
+	}
 	}
 
 	return true;

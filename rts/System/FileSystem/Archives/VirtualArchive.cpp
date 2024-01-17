@@ -3,6 +3,7 @@
 #include "VirtualArchive.h"
 #include "System/FileSystem/FileSystem.h"
 #include "System/FileSystem/DataDirsAccess.h"
+
 #include "System/FileSystem/FileQueryFlags.h"
 #include "System/Log/ILog.h"
 
@@ -56,6 +57,7 @@ unsigned int CVirtualArchiveOpen::NumFiles() const
 
 bool CVirtualArchiveOpen::GetFile( unsigned int fid, std::vector<std::uint8_t>& buffer )
 {
+	LOG("CVirtualArchiveOpen::GetFile");
 	return archive->GetFile(fid, buffer);
 }
 
@@ -74,6 +76,7 @@ CVirtualArchiveOpen* CVirtualArchive::Open()
 
 bool CVirtualArchive::GetFile(unsigned int fid, std::vector<std::uint8_t>& buffer)
 {
+	LOG("CVirtualArchive::GetFile");
 	if (fid >= files.size())
 		return false;
 
