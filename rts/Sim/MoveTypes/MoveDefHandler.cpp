@@ -1,5 +1,6 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
+#include <tracy/Tracy.hpp>
 #include "MoveDefHandler.h"
 #include "Lua/LuaParser.h"
 #include "Map/MapInfo.h"
@@ -102,6 +103,7 @@ static MoveDef::SpeedModClass ParseSpeedModClass(const std::string& moveDefName,
 
 void MoveDefHandler::Init(LuaParser* defsParser)
 {
+	ZoneScopedN("MoveDefHandler::Init");
 	const LuaTable& rootTable = defsParser->GetRoot().SubTable("MoveDefs");
 
 	if (!rootTable.IsValid())

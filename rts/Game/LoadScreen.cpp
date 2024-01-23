@@ -293,28 +293,21 @@ bool CLoadScreen::Draw()
 		lastDrawTime = now;
 	}
 
-  LOG("[LoadScreen::%s] drawFrame", __func__);
 	globalRendering->drawFrame = std::max(1U, globalRendering->drawFrame + 1);
 	// let LuaMenu keep the lobby connection alive
 	if (luaMenu != nullptr) {
-    LOG("[LoadScreen::%s] luaMenu->Update", __func__);
 		luaMenu->Update();
   }
 
 	if (luaIntro != nullptr) {
     ZoneScopedN("[CLoadScreen::Draw] luaIntro calls");
-    LOG("[LoadScreen::%s] luaIntro->Update", __func__);
 		luaIntro->Update();
-    LOG("[LoadScreen::%s] luaIntro->DrawGenesis", __func__);
 		luaIntro->DrawGenesis();
-    LOG("[LoadScreen::%s] ClearScreen", __func__);
 		ClearScreen();
-    LOG("[LoadScreen::%s] DrawLoadScreen", __func__);
 		luaIntro->DrawLoadScreen();
 	}
 
 	if (!mtLoading) {
-    LOG("[LoadScreen::%s] SwapBuffer", __func__);
 		globalRendering->SwapBuffers(true, false);
   }
 

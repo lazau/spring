@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <cassert>
+#include <tracy/Tracy.hpp>
 
 #include "System/float4.h"
 #include "System/Matrix44f.h"
@@ -106,6 +107,7 @@ std::size_t TypedStorageBufferUploader<T, Derived>::GetProjectileElemOffset(int3
 
 void MatrixUploader::InitDerived()
 {
+	ZoneScopedN("MatrixUploader::InitDerived");
 	if (!globalRendering->haveGL4)
 		return;
 
@@ -289,6 +291,7 @@ std::size_t MatrixUploader::GetElemOffsetImpl(const CProjectile* p) const
 
 void ModelsUniformsUploader::InitDerived()
 {
+	ZoneScopedN("ModelsUniformsUploader::InitDerived");
 	if (!globalRendering->haveGL4)
 		return;
 

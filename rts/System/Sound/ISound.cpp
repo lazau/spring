@@ -3,6 +3,7 @@
 #include "ISound.h"
 
 #include <cstring> //memset
+#include <tracy/Tracy.hpp>
 
 #ifndef   NO_SOUND
 #include "OpenAL/Sound.h"
@@ -148,6 +149,7 @@ bool ISound::ChangeOutput(bool forceNullSound)
 
 bool ISound::LoadSoundDefs(LuaParser* defsParser)
 {
+	ZoneScopedN("ISound::LoadSoundDefs");
 	return (singleton->LoadSoundDefsImpl(defsParser));
 }
 

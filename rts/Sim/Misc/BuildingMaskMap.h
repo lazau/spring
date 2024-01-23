@@ -4,6 +4,7 @@
 #define BUILDINGMASKMAP_H
 
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 #include "System/creg/creg_cond.h"
 
@@ -13,6 +14,7 @@ class BuildingMaskMap
 
 public:
 	void Init(unsigned int numSquares) {
+		ZoneScopedN("rts/Sim/Misc/BuildingMaskMap.h:Init");
 		maskMap.clear();
 		maskMap.resize(numSquares, 1); // 1st bit set to 1 indicates a normal tile
 	};

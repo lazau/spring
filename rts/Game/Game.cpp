@@ -556,6 +556,7 @@ void CGame::LoadMap(const std::string& mapFileName)
 		readMap = CReadMap::LoadMap(mapFileName);
 
 		// half size; building positions are snapped to multiples of BUILD_SQUARE_SIZE
+		LOG("Map dims: hmapx %u hmapy %u mapSquares %u", mapDims.hmapx, mapDims.hmapy, mapDims.mapSquares);
 		buildingMaskMap.Init(mapDims.hmapx * mapDims.hmapy);
 		groundBlockingObjectMap.Init(mapDims.mapSquares);
 	}
@@ -668,6 +669,8 @@ void CGame::PostLoadSimulation(LuaParser* defsParser)
 		featureDefHandler->Init(defsParser);
 	}
 
+	{
+	ZoneScopedN("Game::PostLoadSim (Other)");
 	CUnit::InitStatic();
 	CCommandAI::InitCommandDescriptionCache();
 	CUnitScriptFactory::InitStatic();
@@ -714,6 +717,7 @@ void CGame::PostLoadSimulation(LuaParser* defsParser)
 
 	inMapDrawerModel = new CInMapDrawModel();
 	inMapDrawer = new CInMapDraw();
+	}
 
 	LEAVE_SYNCED_CODE();
 }
@@ -896,6 +900,7 @@ void CGame::LoadFinalize()
 {
 	SCOPED_ONCE_TIMER("Game::LoadFinalize");
 	{
+		ZoneScopedN("pathManager::Finalize");
 		loadscreen->SetLoadMessage("[" + std::string(__func__) + "] finalizing PFS");
 
 		ENTER_SYNCED_CODE();

@@ -1,6 +1,7 @@
 /* This file is part of the Spring engine (GPL v2 or later), see LICENSE.html */
 
 #include <algorithm>
+#include <tracy/Tracy.hpp>
 
 #include "QuadField.h"
 #include "Map/ReadMap.h"
@@ -109,6 +110,7 @@ void CQuadField::Quad::PostLoad()
 
 void CQuadField::Init(int2 mapDims, int quadSize)
 {
+	ZoneScopedN("CQuadField::Init");
 	quadSizeX = quadSize;
 	quadSizeZ = quadSize;
 	numQuadsX = (mapDims.x * SQUARE_SIZE) / quadSize;

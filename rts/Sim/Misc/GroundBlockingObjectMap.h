@@ -5,6 +5,7 @@
 
 #include <array>
 #include <vector>
+#include <tracy/Tracy.hpp>
 
 #include "Sim/Objects/SolidObject.h"
 #include "System/creg/creg_cond.h"
@@ -98,6 +99,7 @@ public:
 
 
 	void Init(unsigned int numSquares) {
+		ZoneScopedN("rts/Sim/Misc/GroundBlockingObjectMap.h:Init");
 		arrCells.resize(numSquares);
 		vecCells.reserve(32);
 		vecIndcs.reserve(32);

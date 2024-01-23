@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <cctype>
+#include <tracy/Tracy.hpp>
 
 #include "DamageArrayHandler.h"
 #include "Game/GameVersion.h"
@@ -28,6 +29,7 @@ CDamageArrayHandler damageArrayHandler;
 
 void CDamageArrayHandler::Init(LuaParser* defsParser)
 {
+	ZoneScopedN("CDamageArrayHandler::Init");
 	#define DEFAULT_ARMORDEF_NAME "default"
 
 	try {

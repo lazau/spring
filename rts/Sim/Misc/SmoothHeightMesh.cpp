@@ -3,6 +3,7 @@
 #include <vector>
 #include <cassert>
 #include <limits>
+#include <tracy/Tracy.hpp>
 
 #include "SmoothHeightMesh.h"
 
@@ -57,6 +58,7 @@ static float Interpolate(float x, float y, const int maxx, const int maxy, const
 
 void SmoothHeightMesh::Init(int2 max, int res, int smoothRad)
 {
+	ZoneScopedN("SmoothHeightMesh::Init");
 	Kill();
 
 	enabled = modInfo.enableSmoothMesh;
